@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <form action="/" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="formFile" class="form-label">Resume:</label>
+      <input id="formFile" class="form-control" type="file" accept=".pdf" name="resume">
+    </div>
+    <!-- <div class="mb-3">
+      <label for="formFile" class="form-label">JD (Optional):</label>
+      <input class="form-control" type="file" accept=".pdf" name="resume" id="formFile">
+    </div> -->
+    <button type="submit">Start Interview</button>
+  </form>
+{% endblock %}
+
