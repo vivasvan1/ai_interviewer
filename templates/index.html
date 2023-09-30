@@ -1,6 +1,16 @@
 {% extends 'base.html' %} {% block content %}
 <form action="/" method="post" enctype="multipart/form-data">
   <div class="mb-3">
+    <label for="formFile" class="form-label">JD (Optional):</label>
+    <input
+      id="formFile"
+      class="form-control"
+      type="file"
+      accept=".pdf"
+      name="jd"
+    />
+  </div>
+  <div class="mb-3">
     <label for="formFile" class="form-label">Resume:</label>
     <input
       id="formFile"
