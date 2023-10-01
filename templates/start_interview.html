@@ -1,4 +1,6 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} 
+
+{% block content %}
 <div class="d-flex flex-column mb-3">
   <div class="container mt-5">
     <h1>Interviewer Said:</h1>
@@ -37,6 +39,10 @@
       style="display: none !important"
       class="flex-column mt-3"
     >
+      <div class="bd-callout bd-callout-info">
+        <strong>Feel free to re-record </strong>if you are not satisfied with
+        your response.
+      </div>
       <audio id="player" controls></audio>
       <input type="hidden" id="user_response" name="user_response" />
       <!-- SEND BUTTON -->
