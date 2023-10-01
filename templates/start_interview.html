@@ -1,6 +1,4 @@
-{% extends 'base.html' %}
-
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="d-flex flex-column mb-3">
   <div class="container mt-5">
     <h1>Interviewer Said:</h1>
@@ -17,57 +15,92 @@
   </div>
   <div class="container mt-5">
     <h1>Record your response:</h1>
-    <form action="/" method="post" enctype="multipart/form-data">
+
+    <!-- RECORD BUTTONS -->
+    <div class="d-flex justify-content-left mt-3">
+      <button id="record-button" class="btn btn-primary btn-lg" type="button">
+        <i class="bi bi-mic"></i> Record
+      </button>
+      <button
+        id="stop-button"
+        style="display: none"
+        class="btn btn-danger btn-lg"
+        type="button"
+      >
+        <i class="bi bi-stop-fill"></i> Stop
+      </button>
+    </div>
+
+    <!--RESPONSE PLAYER -->
+    <div
+      id="response_player"
+      style="display: none !important"
+      class="flex-column mt-3"
+    >
       <audio id="player" controls></audio>
-      <button class="btn btn-primary" type="button" id="start">Start Recording Response</button>
-      <button class="btn btn-danger" type="button" id="stop">Stop</button>
-      <input type="hidden" id="user_response" name="user_response">
-      <button class="btn btn-success" type="submit">Submit</button>
-      <script>
-        const player = document.getElementById("player");
-      const stopButton = document.getElementById("stop");
-      const startButton = document.getElementById("start");
-      const audioDataInput = document.getElementById("user_response");
-
-      const handleSuccess = function (stream) {
-        const options = { mimeType: "audio/webm" };
-        const recordedChunks = [];
-        const mediaRecorder = new MediaRecorder(stream, options);
-
-        mediaRecorder.addEventListener("dataavailable", function (e) {
-          if (e.data.size > 0) {
-            recordedChunks.length = 0;
-            recordedChunks.push(e.data);
-          }
-        });
-
-        mediaRecorder.addEventListener("stop", function () {
-          const audioBlob = new Blob(recordedChunks, { type: "audio/webm" });
-          
-          // Convert audio Blob to Base64
-          const reader = new FileReader();
-          reader.onload = function () {
-            const audioBase64 = reader.result.split(",")[1]; // Extract the Base64 data
-            audioDataInput.value = audioBase64;
-          };
-          reader.readAsDataURL(audioBlob);
-          player.src = URL.createObjectURL(audioBlob);
-        });
-
-        stopButton.addEventListener("click", function () {
-          mediaRecorder.stop();
-        });
-
-        startButton.addEventListener("click", function () {
-          mediaRecorder.start();
-        });
-      };
-
-      navigator.mediaDevices
-        .getUserMedia({ audio: true, video: false })
-        .then(handleSuccess);
-      </script>
-    </form>
+      <input type="hidden" id="user_response" name="user_response" />
+      <!-- SEND BUTTON -->
+      <button
+        class="btn btn-success btn-lg mt-3"
+        style="width: min-content"
+        type="submit"
+      >
+        <i class="bi bi-send"></i> Send
+      </button>
+    </div>
   </div>
+  <script>
+    const player = document.getElementById("player");
+    const recordButton = document.getElementById("record-button");
+    const stopButton = document.getElementById("stop-button");
+    const audioDataInput = document.getElementById("user_response");
+    const responsePlayer = document.getElementById("response_player");
+
+    const handleSuccess = function (stream) {
+      const options = { mimeType: "audio/webm" };
+      let recordedChunks = [];
+      const mediaRecorder = new MediaRecorder(stream, options);
+
+      mediaRecorder.addEventListener("dataavailable", function (e) {
+        if (e.data.size > 0) {
+          recordedChunks.push(e.data);
+        }
+      });
+
+      mediaRecorder.addEventListener("stop", function () {
+        const audioBlob = new Blob(recordedChunks, { type: "audio/webm" });
+
+        // Convert audio Blob to Base64
+        const reader = new FileReader();
+        reader.onload = function () {
+          const audioBase64 = reader.result.split(",")[1]; // Extract the Base64 data
+          audioDataInput.value = audioBase64;
+        };
+        reader.readAsDataURL(audioBlob);
+        player.src = URL.createObjectURL(audioBlob);
+      });
+
+      recordButton.addEventListener("click", function () {
+        // Start recording
+        recordedChunks = [];
+        mediaRecorder.start();
+        stopButton.style.display = "block";
+        recordButton.style.display = "none";
+        responsePlayer.style.display = "none";
+      });
+
+      stopButton.addEventListener("click", function () {
+        // Stop recording
+        mediaRecorder.stop();
+        stopButton.style.display = "none";
+        recordButton.style.display = "block";
+        responsePlayer.style.display = "flex";
+      });
+    };
+
+    navigator.mediaDevices
+      .getUserMedia({ audio: true, video: false })
+      .then(handleSuccess);
+  </script>
 </div>
 {% endblock %}
