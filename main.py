@@ -24,19 +24,19 @@ class AIResponse(BaseModel):
     response: str
 
 
+
 @app.post("/process-resume", response_model=AIResponse)
 async def process_resume(resume: UploadFile = Form(...), jd: UploadFile = None):
     try:
-        ai_reply = process_resume_and_jd(resume.file, jd.file if jd else None)
-        return {"response": ai_reply}
+        ai_reply, question_text = process_resume_and_jd(resume.file, jd.file if jd else None)
+        return {"response": question_text}
     except Exception as e:
         raise HTTPException(detail=str(e), status_code=400)
 
-
-
 @app.post("/process-response", response_model=AIResponse)
-async def user_response(response_audio: UploadFile = Form(...), chat_messages: list[BaseMessage] = Depends(lambda: [])):
+async def user_response(response_audio: UploadFile = Form(...), chat_messages: str = Form(...)):
     try:
+        
         ai_reply = process_user_response(response_audio,chat_messages)
         ai_audio_obj = do_text_to_speech(ai_reply)
         binary_audio_data = ai_audio_obj.data

@@ -97,6 +97,6 @@ def process_resume_and_jd(resume_file, jd=None):
     # chat_messages[0].content = chat_messages[0].content.replace("{interview_questions}", question_text)
     # out = chat(chat_messages)
     # ai_reply = json.loads(out.content)["message"]
-    ai_reply:str = "Hi there this is Sam.your AI Interviewer for today Hope you are doing well. Shall we get started?"
+    ai_reply:str = "Hi there this is Sam.Your AI Interviewer for today Hope you are doing well. Shall we get started?"
     # chat_messages.append(AIMessage(content=ai_reply))
-    return ai_reply
+    return ai_reply, question_text
