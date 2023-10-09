@@ -1,20 +1,20 @@
+import uvicorn
 import base64
 from fastapi import FastAPI, UploadFile, Form, Depends, HTTPException
 from fastapi.responses import JSONResponse
-import uvicorn
-from src.agent.simple import process_user_response
 from langchain.schema import BaseMessage
+from IPython.display import Audio
 
+from src.agent.simple import process_user_response
 from src.processing.resume import process_resume_and_jd
 from src.processing.tts import do_text_to_speech
-from bark import SAMPLE_RATE
-from IPython.display import Audio
-# import whisper
-from bark import preload_models
+
+from bark import preload_models, SAMPLE_RATE
+import whisper
 
 # Preload AI models
 preload_models(True,True,True,True,True,True,True,False)
-# stt_model = whisper.load_model("small")
+stt_model = whisper.load_model("small")
 
 app = FastAPI()
 
