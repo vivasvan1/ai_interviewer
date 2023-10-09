@@ -1,20 +1,12 @@
 import base64
-from pypdf import PdfReader
 import whisper
-from langchain import OpenAI
-from langchain.chains import LLMChain, ConversationChain
-from langchain.chains.conversation.memory import (
-    ConversationBufferMemory,
-    ConversationSummaryMemory,
-    ConversationBufferWindowMemory,
-    ConversationKGMemory,
-)
 
-from langchain.callbacks import get_openai_callback
 from langchain.schema import AIMessage, HumanMessage, SystemMessage, BaseMessage
 from IPython.display import Audio
 from bark import SAMPLE_RATE
 from langchain.chat_models import ChatOpenAI
+
+from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 
 chat = ChatOpenAI(temperature=0.3)
 
@@ -37,12 +29,15 @@ def conversation(message: str, chat_messages: list[BaseMessage]) -> str:
     return out.content
 
 
-def process_user_response(user_response_file, chat_messages: list[BaseMessage]):
+def process_user_response(user_response_file, history: ChatMessageHistoryWithJSON):
     audio_data = base64.b64decode(user_response_file)
     human_audio_obj = Audio(audio_data, rate=SAMPLE_RATE)
     with open(f"tmp_human.wav", "wb") as f:
         f.write(human_audio_obj.data)
     human_reply = stt_model.transcribe(f"tmp_human.wav")
     human_reply_text = human_reply["text"]
-    ai_reply: str = conversation(human_reply_text, chat_messages)
+    history.add_user_message(human_reply_text)
+    ai_reply: str = conversation(human_reply_text, history.messages)
+    history.add_ai_message(ai_reply)
+
     return ai_reply
