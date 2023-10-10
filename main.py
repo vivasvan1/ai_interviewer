@@ -24,7 +24,7 @@ class AIResponse(BaseModel):
     history: str
 
 
-@app.post("interview/start", response_model=AIResponse, tags=["Interview"], description="Process the uploaded resume (optionally a job description) and produce AI response")
+@app.post("/interview/start", response_model=AIResponse, tags=["Interview"], description="Process the uploaded resume (optionally a job description) and produce AI response")
 async def process_resume(resume: UploadFile = Form(...), jd: UploadFile = None):
     try:
         ai_reply, question_text, system_message = process_resume_and_jd(
@@ -41,7 +41,7 @@ async def process_resume(resume: UploadFile = Form(...), jd: UploadFile = None):
         raise HTTPException(detail=str(e), status_code=400)
 
 
-@app.post("interview/next", response_model=AIResponse, tags=["Interview"], description="Process user's audio response and compute AI response")
+@app.post("/interview/next", response_model=AIResponse, tags=["Interview"], description="Process user's audio response and compute AI response")
 async def user_response(
     response_audio: UploadFile = Form(...), chat_messages: str = Form(...)
 ):
