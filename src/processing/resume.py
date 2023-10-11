@@ -18,7 +18,7 @@ def get_questions_from_resume(path_to_resume: str):
         messages=[
             {
                 "role": "system",
-                "content": "You are an interviewer and given my resume and i want you to provide me a list of relevant questions from it. Return on JSON output of structure \{ questions:[{question_text:string}] \}",
+                "content": "You are an interviewer and given my resume and i want you to provide me a list of relevant questions from it. ",
             },
             {
                 "role": "user",
@@ -88,7 +88,7 @@ def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
     return questions_text
 
 
-def process_resume_and_jd(resume_file, jd=None):
+def process_resume_and_jd(resume_file, jd=None,questions=""):
     question_text = ""
     if jd == None or jd.filename == "":
         question_text = get_questions_from_resume(resume_file)
@@ -99,7 +99,9 @@ def process_resume_and_jd(resume_file, jd=None):
     # system_response_prompt="""Please respond only in JSON of format { type:"interviewer",message:"message1"} and only one message\n\n"""
     system_response_prompt = """Ask only one question per response"""
     system_message = system_personality_prompt + system_response_prompt
-    system_message = system_message.replace("{interview_questions}", question_text)
+
+    final_questions = questions + " and " + question_text if questions else question_text
+    system_message = system_message.replace("{interview_questions}",final_questions )
     
     # out = chat(chat_messages)
     # ai_reply = json.loads(out.content)["message"]

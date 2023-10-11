@@ -25,10 +25,10 @@ class AIResponse(BaseModel):
 
 
 @app.post("/interview/start", response_model=AIResponse, tags=["Interview"], description="Process the uploaded resume (optionally a job description) and produce AI response")
-async def process_resume(resume: UploadFile = Form(...), jd: UploadFile = None):
+async def process_resume(resume: UploadFile = Form(...), jd: UploadFile = None, questions: str= ""):
     try:
         ai_reply, question_text, system_message = process_resume_and_jd(
-            resume.file, jd.file if jd else None
+            resume.file, jd.file if jd else None, questions
         )
         history = ChatMessageHistoryWithJSON()
         history.messages.append(SystemMessage(content=system_message))
