@@ -1,5 +1,6 @@
 import base64
-from fastapi import FastAPI, UploadFile, Form, HTTPException
+from fastapi import FastAPI, UploadFile, Form,File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from langchain.schema import SystemMessage
 from src.agent.simple import process_user_response
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
@@ -15,6 +16,19 @@ preload_models(True, True, True, True, True, True, True, False)
 stt_model = whisper.load_model("small")
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 from pydantic import BaseModel
 
@@ -43,14 +57,16 @@ async def process_resume(resume: UploadFile = Form(...), jd: UploadFile = None, 
 
 @app.post("/interview/next", response_model=AIResponse, tags=["Interview"], description="Process user's audio response and compute AI response")
 async def user_response(
-    response_audio: UploadFile = Form(...), chat_messages: str = Form(...)
+    response_audio: UploadFile = File(...), chat_messages: str = Form(...)
 ):
     try:
         # convert chat_messages_string to list of AI, Human, System Messages
         history = ChatMessageHistoryWithJSON()
         history.from_json(chat_messages)
 
-        ai_reply = process_user_response(response_audio, history)
+        audio_bytes = await response_audio.read()
+
+        ai_reply = process_user_response(audio_bytes, history)
         ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply))
 
         return {"response": ai_response_base64, "history": history.to_json()}
