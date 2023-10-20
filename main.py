@@ -9,6 +9,10 @@ from src.processing.tts import do_text_to_speech
 from bark import preload_models
 import whisper
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
+
 from src.utils.audio import convert_audio_to_base64
 
 # Preload AI models
@@ -56,20 +60,30 @@ async def process_resume(resume: UploadFile = Form(...), jd: UploadFile = None, 
 
 
 @app.post("/interview/next", response_model=AIResponse, tags=["Interview"], description="Process user's audio response and compute AI response")
-async def user_response(
-    response_audio: UploadFile = File(...), chat_messages: str = Form(...)
-):
+async def user_response(response_audio: UploadFile = File(...), chat_messages: str = Form(...)):
     try:
+        logging.info("Received request for /interview/next")
+
+        audio_bytes = await response_audio.read()
+
+        # Check if audio_bytes is not empty
+        if not audio_bytes:
+            raise ValueError("No audio data found in the uploaded file")
+
         # convert chat_messages_string to list of AI, Human, System Messages
         history = ChatMessageHistoryWithJSON()
         history.from_json(chat_messages)
 
-        audio_bytes = await response_audio.read()
-
         ai_reply = process_user_response(audio_bytes, history)
+        if not ai_reply:
+            raise ValueError("AI reply is empty or null")
+
         ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply))
+        if not ai_response_base64:
+            raise ValueError("Failed to convert AI reply to base64 encoded audio")
 
         return {"response": ai_response_base64, "history": history.to_json()}
 
     except Exception as e:
+        logging.error(f"Error in user_response: {e}")
         raise HTTPException(detail=str(e), status_code=400)

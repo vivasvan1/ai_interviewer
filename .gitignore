@@ -1,3 +1,6 @@
 venv
 **/*.pyc
 bfg-1.14.0.jar
+
+ngrok.sh
+tmp_human.wav

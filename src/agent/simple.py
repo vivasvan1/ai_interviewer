@@ -23,17 +23,17 @@ stt_model = whisper.load_model("small")
 
 
 def conversation(message: str, chat_messages: list[BaseMessage]) -> str:
-    chat_messages.append(HumanMessage(content=message))
+    # chat_messages.append(HumanMessage(content=message))
     out = chat(chat_messages)
-    chat_messages.append(AIMessage(content=out.content))
+    # chat_messages.append(AIMessage(content=out.content))
     return out.content
 
 
-def process_user_response(user_response_file, history: ChatMessageHistoryWithJSON):
-    audio_data = base64.b64decode(user_response_file)
-    human_audio_obj = Audio(audio_data, rate=SAMPLE_RATE)
+def process_user_response(audio_data, history: ChatMessageHistoryWithJSON):
+    # audio_data = base64.b64decode(user_response_file)
+    # human_audio_obj = Audio(audio_data, rate=SAMPLE_RATE)
     with open(f"tmp_human.wav", "wb") as f:
-        f.write(human_audio_obj.data)
+        f.write(audio_data)
     human_reply = stt_model.transcribe(f"tmp_human.wav")
     human_reply_text = human_reply["text"]
     history.add_user_message(human_reply_text)
