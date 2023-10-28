@@ -1,5 +1,5 @@
 import base64
-from fastapi import FastAPI, UploadFile, Form,File, HTTPException
+from fastapi import FastAPI, UploadFile, Form, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.schema import SystemMessage
 from src.agent.simple import process_user_response
@@ -42,16 +42,24 @@ class AIResponse(BaseModel):
     history: str
 
 
-@app.post("/interview/start", response_model=AIResponse, tags=["Interview"], description="Process the uploaded resume (optionally a job description) and produce AI response")
-async def process_resume(resume: UploadFile = Form(...), jd: UploadFile = None, questions: str= ""):
+@app.post(
+    "/interview/start",
+    response_model=AIResponse,
+    tags=["Interview"],
+    description="Process the uploaded resume (optionally a job description) and produce AI response",
+)
+async def process_resume(
+    resume: UploadFile = Form(...), jd: UploadFile = None, questions: str = ""
+):
     try:
         ai_reply, question_text, system_message = process_resume_and_jd(
             resume.file, jd.file if jd else None, questions
         )
-        history = ChatMessageHistoryWithJSON()
-        history.messages.append(SystemMessage(content=system_message))
+        history = ChatMessageHistoryWithJSON(timestamps=[])
+        history.add_message(SystemMessage(content=system_message))
+        # history.messages.append(SystemMessage(content=system_message))
         history.add_ai_message(ai_reply)
-        
+
         ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply))
         return {"response": ai_response_base64, "history": history.to_json()}
 
@@ -59,8 +67,15 @@ async def process_resume(resume: UploadFile = Form(...), jd: UploadFile = None, 
         raise HTTPException(detail=str(e), status_code=400)
 
 
-@app.post("/interview/next", response_model=AIResponse, tags=["Interview"], description="Process user's audio response and compute AI response")
-async def user_response(response_audio: UploadFile = File(...), chat_messages: str = Form(...)):
+@app.post(
+    "/interview/next",
+    response_model=AIResponse,
+    tags=["Interview"],
+    description="Process user's audio response and compute AI response",
+)
+async def user_response(
+    response_audio: UploadFile = File(...), chat_messages: str = Form(...)
+):
     try:
         logging.info("Received request for /interview/next")
 
@@ -71,7 +86,7 @@ async def user_response(response_audio: UploadFile = File(...), chat_messages: s
             raise ValueError("No audio data found in the uploaded file")
 
         # convert chat_messages_string to list of AI, Human, System Messages
-        history = ChatMessageHistoryWithJSON()
+        history = ChatMessageHistoryWithJSON(timestamps=[])
         history.from_json(chat_messages)
 
         ai_reply = process_user_response(audio_bytes, history)
