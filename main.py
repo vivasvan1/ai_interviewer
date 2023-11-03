@@ -23,6 +23,9 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
+    "https://ai-interviewer-two.vercel.app",
+    "https://vaato.vercel.app",
+    "https://vaato.ultimateworld.io"
 ]
 
 
