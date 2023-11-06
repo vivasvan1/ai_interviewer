@@ -8,8 +8,14 @@ from src.processing.resume import process_resume_and_jd
 from src.processing.tts import do_text_to_speech
 from bark import preload_models
 import whisper
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
 
 import logging
+
 logging.basicConfig(level=logging.INFO)
 
 
