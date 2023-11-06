@@ -1,3 +1,10 @@
+
+from os.path import join, dirname
+from dotenv import load_dotenv
+import os
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
+
 import base64
 from fastapi import FastAPI, UploadFile, Form, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,11 +15,7 @@ from src.processing.resume import process_resume_and_jd
 from src.processing.tts import do_text_to_speech
 from bark import preload_models
 import whisper
-from os.path import join, dirname
-from dotenv import load_dotenv
 
-dotenv_path = join(dirname(__file__), ".env")
-load_dotenv(dotenv_path)
 
 import logging
 
