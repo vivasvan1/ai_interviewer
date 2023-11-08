@@ -29,10 +29,11 @@ async def positive_analysis_response(chat_messages: str = Form(...)):
         # convert chat_messages_string to list of AI, Human, System Messages
         history = ChatMessageHistoryWithJSON(timestamps=[])
         history.from_json(chat_messages)
+        history.messages = history.messages[1:]
+        history.timestamps = history.timestamps[1:]
+        positive_response = generate_positive_analysis(history)
 
-        positive_response = await generate_positive_analysis(history)
-
-        return {"response": positive_response}
+        return {"response": str(positive_response)}
 
     except Exception as e:
         logging.error(f"Error in user_response: {e}")
@@ -52,10 +53,13 @@ async def improvement_analysis_response(chat_messages: str = Form(...)):
         # convert chat_messages_string to list of AI, Human, System Messages
         history = ChatMessageHistoryWithJSON(timestamps=[])
         history.from_json(chat_messages)
+        
+        history.messages = history.messages[1:]
+        history.timestamps = history.timestamps[1:]
 
-        positive_response = await generate_improvement_analysis(history)
+        improvement_response = generate_improvement_analysis(history)
 
-        return {"response": positive_response}
+        return {"response": str(improvement_response)}
 
     except Exception as e:
         logging.error(f"Error in user_response: {e}")
