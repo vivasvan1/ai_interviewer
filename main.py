@@ -1,7 +1,7 @@
-
+import os
 from os.path import join, dirname
 from dotenv import load_dotenv
-import os
+
 dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
@@ -23,6 +23,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 from src.utils.audio import convert_audio_to_base64
+from src.routes.interview.analysis import main as analysis
 
 # Preload AI models
 preload_models(True, True, True, True, True, True, True, False)
@@ -30,11 +31,14 @@ stt_model = whisper.load_model("small")
 
 app = FastAPI()
 
+app.include_router(analysis.router)
+
+
 origins = [
     "http://localhost:3000",
     "https://ai-interviewer-two.vercel.app",
     "https://vaato.vercel.app",
-    "https://vaato.ultimateworld.io"
+    "https://vaato.ultimateworld.io",
 ]
 
 
