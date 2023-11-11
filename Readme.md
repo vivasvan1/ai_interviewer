@@ -1,4 +1,4 @@
-# AI Interviewer
+# Vaato FastAPI Backend 
 
 AI Interviewer is a project designed to automate the process of conducting interviews. It uses advanced AI algorithms to analyze responses and provide insightful feedback. The project was created to streamline the interview process and make it more efficient.
 
@@ -35,7 +35,7 @@ Once the application is running, you can access it by navigating to `localhost:8
 The project is structured as follows:
 
 - `Dockerfile`: This file contains the instructions for building the Docker image.
-- `app/`: This directory contains the application code.
+- `src/`: This directory contains the application code.
 - `tests/`: This directory contains the tests for the application.
 
 Please refer to the individual files and directories for more detailed information.
