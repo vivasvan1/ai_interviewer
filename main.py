@@ -6,7 +6,7 @@ dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
 import base64
-from fastapi import FastAPI, UploadFile, Form, File, HTTPException
+from fastapi import FastAPI, UploadFile, Form, File, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.schema import SystemMessage
 from src.agent.simple import process_user_response
@@ -23,7 +23,9 @@ logging.basicConfig(level=logging.INFO)
 
 
 from src.utils.audio import convert_audio_to_base64
-from src.routes.interview.analysis import main as analysis
+from src.brokers import email
+from src.routes.interview import analysis
+
 
 # Preload AI models
 preload_models(True, True, True, True, True, True, True, False)
@@ -32,6 +34,7 @@ stt_model = whisper.load_model("small")
 app = FastAPI()
 
 app.include_router(analysis.router)
+app.include_router(email.router)
 
 
 origins = [

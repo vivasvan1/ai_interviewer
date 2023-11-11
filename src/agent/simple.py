@@ -4,7 +4,6 @@ import whisper
 
 from langchain.schema import AIMessage, HumanMessage, SystemMessage, BaseMessage
 from IPython.display import Audio
-from bark import SAMPLE_RATE
 from langchain.chat_models import ChatOpenAI
 
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
