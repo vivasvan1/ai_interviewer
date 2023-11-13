@@ -63,7 +63,7 @@ nvidia-cusolver-cu11==11.4.0.1
 nvidia-cusparse-cu11==11.7.4.91
 nvidia-nccl-cu11==2.14.3
 nvidia-nvtx-cu11==11.7.91
-openai==1.2.3
+openai==0.28
 openai-whisper==20231106
 packaging==23.2
 parso==0.8.3
