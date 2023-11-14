@@ -14,14 +14,17 @@ from transformers import BarkModel
 
 model = BarkModel.from_pretrained("suno/bark-small")
 import torch
+
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 model = model.to(device)
 
 from transformers import AutoProcessor
+
 voice_preset = "v2/en_speaker_6"
 
 processor = AutoProcessor.from_pretrained("suno/bark-small")
 from optimum.bettertransformer import BetterTransformer
+
 # Use bettertransform for flash attention
 model = BetterTransformer.transform(model, keep_original_model=False)
 
@@ -55,9 +58,7 @@ def do_text_to_speech(script):
         voice_preset = "v2/en_speaker_6"
 
         inputs = processor(text_prompt, voice_preset=voice_preset).to(device)
-        output = model.generate(
-            **inputs, do_sample=True, fine_temperature=0.4, coarse_temperature=0.8
-        )
+        output = model.generate(**inputs)
 
     for sentence in output:
         # audio_array = generate_audio(sentence, history_prompt=SPEAKER)
