@@ -13,7 +13,6 @@ from src.agent.simple import process_user_response
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 from src.processing.resume import process_resume_and_jd
 from src.processing.tts import do_text_to_speech
-from bark import preload_models
 import whisper
 
 
@@ -21,6 +20,25 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
+from transformers import BarkModel
+
+model = BarkModel.from_pretrained("suno/bark-small")
+import torch
+
+
+
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+model = model.to(device)
+
+from transformers import AutoProcessor
+voice_preset = "v2/en_speaker_6"
+
+processor = AutoProcessor.from_pretrained("suno/bark-small")
+
+from optimum.bettertransformer import BetterTransformer
+
+# Use bettertransform for flash attention
+model = BetterTransformer.transform(model, keep_original_model=False)
 
 from src.utils.audio import convert_audio_to_base64
 from src.brokers import email
@@ -28,7 +46,7 @@ from src.routes.interview import analysis
 
 
 # Preload AI models
-preload_models(True, True, True, True, True, True, True, False)
+# preload_models(True, True, True, True, True, True, True, False)
 stt_model = whisper.load_model("small")
 
 app = FastAPI()
