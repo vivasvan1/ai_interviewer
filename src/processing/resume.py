@@ -95,7 +95,7 @@ def process_resume_and_jd(resume_file, jd=None,questions=""):
     else:
         question_text = get_questions_from_resume_and_jd(resume_file, jd)
 
-    system_personality_prompt = """You are smart friendly and formal interviewer and i want you to have a human voice call type conversation via chat with me start out by introducing yourself as AI Interviewer called Sam and then ask me following questions {interview_questions} or something you think would be interesting to ask based on the response of user\n\n"""
+    system_personality_prompt = """You are smart friendly and formal interviewer and i want you to have a human voice call type conversation via chat with me and ask me following questions {interview_questions} or something you think would be interesting to ask based on the response of user\n\n"""
     # system_response_prompt="""Please respond only in JSON of format { type:"interviewer",message:"message1"} and only one message\n\n"""
     system_response_prompt = """Ask only one question per response"""
     system_message = system_personality_prompt + system_response_prompt
@@ -105,6 +105,6 @@ def process_resume_and_jd(resume_file, jd=None,questions=""):
     
     # out = chat(chat_messages)
     # ai_reply = json.loads(out.content)["message"]
-    ai_reply: str = "Hi there this is Sam.Your AI Interviewer for today Hope you are doing well. Shall we get started?"
+    ai_reply: str = "Hi there this is Vaato.Your AI Interviewer for today Hope you are doing well. Shall we get started?"
     # chat_messages.append(AIMessage(content=ai_reply))
     return ai_reply, question_text, system_message
