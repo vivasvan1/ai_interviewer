@@ -1,3 +1,4 @@
+import collections
 import numpy as np
 import nltk  # we'll use this to split into sentences
 
@@ -14,6 +15,7 @@ from transformers import BarkModel
 
 model = BarkModel.from_pretrained("suno/bark-small")
 import torch
+import webrtcvad
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 model = model.to(device)
