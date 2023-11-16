@@ -1,4 +1,5 @@
 import collections
+import sys
 import numpy as np
 import nltk  # we'll use this to split into sentences
 
@@ -25,6 +26,7 @@ from transformers import AutoProcessor
 voice_preset = "v2/en_speaker_6"
 
 processor = AutoProcessor.from_pretrained("suno/bark-small")
+
 from optimum.bettertransformer import BetterTransformer
 
 # Use bettertransform for flash attention
@@ -66,54 +68,105 @@ def do_text_to_speech(script):
         # audio_array = generate_audio(sentence, history_prompt=SPEAKER)
         pieces += [sentence.cpu().numpy(), silence.copy()]
 
-    ai_audio_obj = np.concatenate(pieces)
+    ai_audio_obj = Audio(data=np.concatenate(pieces), rate=SAMPLE_RATE)
+    with open("/tmp/test.wav", "wb") as f:
+        f.write(ai_audio_obj.data)
 
+    audio, sample_rate = read_wave("/tmp/test.wav")
     vad = webrtcvad.Vad()
-
-    # Define frame duration and padding duration
-    frame_duration_ms = 30
-    padding_duration_ms = 300
-
-    # Apply VAD collector directly to ai_audio_obj
-    frames = frame_generator(frame_duration_ms, ai_audio_obj, SAMPLE_RATE)
+    frames = frame_generator(30, audio, sample_rate)
     frames = list(frames)
-    segments = vad_collector(
-        SAMPLE_RATE, frame_duration_ms, padding_duration_ms, vad, frames
-    )
+    segments = vad_collector(sample_rate, 30, 300, vad, frames)
 
-    # Segmenting the voice audio and save it in a list as bytes
+    # Segmenting the Voice audio and save it in list as bytes
     concataudio = [segment for segment in segments]
 
-    joinedaudio = b"".join([frame.data.tobytes() for frame in concataudio])
+    joinedaudio = b"".join(concataudio)
     audio_array = np.frombuffer(joinedaudio, dtype=np.int16)
     audio_obj = Audio(data=audio_array, rate=SAMPLE_RATE)
+    # vad = webrtcvad.Vad()
+
+    # # Define frame duration and padding duration
+    # frame_duration_ms = 30
+    # padding_duration_ms = 300
+
+    # # Apply VAD collector directly to ai_audio_obj
+    # frames = frame_generator(frame_duration_ms, ai_audio_obj.data, SAMPLE_RATE)
+    # frames = list(frames)
+    # segments = vad_collector(
+    #     SAMPLE_RATE, frame_duration_ms, padding_duration_ms, vad, frames
+    # )
+
+    # # Segmenting the voice audio and save it in a list as bytes
+    # concataudio = [segment for segment in segments]
+
+    # joinedaudio = b"".join([frame.data.tobytes() for frame in concataudio])
+    # audio_array = np.frombuffer(joinedaudio, dtype=np.int16)
+    # audio_obj = Audio(data=audio_array, rate=SAMPLE_RATE)
 
     return audio_obj
+
+import collections
+import contextlib
+import sys
+import wave
+import webrtcvad
+from pydub import AudioSegment
+
+def read_wave(path):
+    """Reads a .wav file.
+    Takes the path, and returns (PCM audio data, sample rate).
+    """
+    sound = AudioSegment.from_mp3(path)
+    sound = sound.set_frame_rate(16000)  # Convert to 16000 Hz
+    sound.export(path, format="wav")
+
+    with contextlib.closing(wave.open(path, "rb")) as wf:
+        num_channels = wf.getnchannels()
+        assert num_channels == 1
+        sample_width = wf.getsampwidth()
+        assert sample_width == 2
+        sample_rate = wf.getframerate()
+
+        assert sample_rate in (8000, 16000, 32000, 48000)
+        pcm_data = wf.readframes(wf.getnframes())
+        return pcm_data, sample_rate
+
+
+def write_wave(path, audio, sample_rate):
+    """Writes a .wav file.
+    Takes path, PCM audio data, and sample rate.
+    """
+    with contextlib.closing(wave.open(path, "wb")) as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sample_rate)
+        wf.writeframes(audio)
 
 
 class Frame(object):
     """Represents a "frame" of audio data."""
 
-    def __init__(self, data, timestamp, duration):
-        self.data = data
+    def __init__(self, bytes, timestamp, duration):
+        self.bytes = bytes
         self.timestamp = timestamp
         self.duration = duration
 
 
 def frame_generator(frame_duration_ms, audio, sample_rate):
     """Generates audio frames from PCM audio data.
-    Takes the desired frame duration in milliseconds, the audio data, and
+    Takes the desired frame duration in milliseconds, the PCM data, and
     the sample rate.
     Yields Frames of the requested duration.
     """
-    frame_size = int(sample_rate * (frame_duration_ms / 1000.0))
-    num_frames = len(audio) // frame_size
-    for i in range(num_frames):
-        start = i * frame_size
-        end = start + frame_size
-        timestamp = float(start) / sample_rate
-        duration = float(frame_size) / sample_rate
-        yield Frame(audio[start:end], timestamp, duration)
+    n = int(sample_rate * (frame_duration_ms / 1000.0) * 2)
+    offset = 0
+    timestamp = 0.0
+    duration = (float(n) / sample_rate) / 2.0
+    while offset + n < len(audio):
+        yield Frame(audio[offset : offset + n], timestamp, duration)
+        timestamp += duration
+        offset += n
 
 
 def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, frames):
@@ -145,8 +198,10 @@ def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, fram
 
     voiced_frames = []
     for frame in frames:
-        is_speech = vad.is_speech(frame.data.tobytes(), sample_rate)
+        print(frame, type(frame))
+        is_speech = vad.is_speech(frame.bytes, sample_rate)
 
+        sys.stdout.write("1" if is_speech else "0")
         if not triggered:
             ring_buffer.append((frame, is_speech))
             num_voiced = len([f for f, speech in ring_buffer if speech])
@@ -155,6 +210,7 @@ def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, fram
             # TRIGGERED state.
             if num_voiced > 0.9 * ring_buffer.maxlen:
                 triggered = True
+                sys.stdout.write("+(%s)" % (ring_buffer[0][0].timestamp,))
                 # We want to yield all the audio we see from now until
                 # we are NOTTRIGGERED, but we have to start with the
                 # audio that's already in the ring buffer.
@@ -171,12 +227,15 @@ def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, fram
             # unvoiced, then enter NOTTRIGGERED and yield whatever
             # audio we've collected.
             if num_unvoiced > 0.9 * ring_buffer.maxlen:
+                sys.stdout.write("-(%s)" % (frame.timestamp + frame.duration))
                 triggered = False
-                yield b"".join([f.data.tobytes() for f in voiced_frames])
+                yield b"".join([f.bytes for f in voiced_frames])
                 ring_buffer.clear()
                 voiced_frames = []
-
+    if triggered:
+        sys.stdout.write("-(%s)" % (frame.timestamp + frame.duration))
+    sys.stdout.write("\n")
     # If we have any leftover voiced audio when we run out of input,
     # yield it.
     if voiced_frames:
-        yield b"".join([f.data.tobytes() for f in voiced_frames])
+        yield b"".join([f.bytes for f in voiced_frames])
