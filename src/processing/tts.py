@@ -83,7 +83,7 @@ def do_text_to_speech(script):
 
     joinedaudio = b"".join(concataudio)
     audio_array = np.frombuffer(joinedaudio, dtype=np.int16)
-    audio_obj = Audio(data=audio_array, rate=SAMPLE_RATE)
+    audio_obj = Audio(data=audio_array, rate=16000)
     # vad = webrtcvad.Vad()
 
     # # Define frame duration and padding duration
