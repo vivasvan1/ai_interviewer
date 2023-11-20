@@ -2,7 +2,7 @@ import os
 import smtplib
 from email.message import EmailMessage
 from typing import Optional
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Form
 
 # Configure your SMTP server settings here
 SMTP_SERVER = "smtp.gmail.com"
@@ -26,11 +26,10 @@ async def send_email(email_message):
 
 @router.post("/send_email")
 async def send_email_background(
-    recipient: str,
-    subject: str,
-    message_html: str,
     background_tasks: BackgroundTasks,
-    message_body: Optional[str] = "",
+    recipient: str = Form(...),
+    subject: str = Form(...),
+    message_html: str = Form(...),
 ):
     # Create an EmailMessage object
     msg = EmailMessage()
