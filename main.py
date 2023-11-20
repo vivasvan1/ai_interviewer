@@ -6,7 +6,7 @@ dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
 import base64
-from fastapi import FastAPI, UploadFile, Form, File, HTTPException, BackgroundTasks
+from fastapi import FastAPI, UploadFile, Form, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.schema import SystemMessage
 from src.agent.simple import process_user_response
