@@ -45,13 +45,12 @@ def get_questions_from_resume(path_to_resume: str):
     return questions_text
 
 
-def read_pdf(upload_file: UploadFile) -> str:
+def read_pdf(upload_file: str) -> str:
     text = ""
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
         # Save uploaded file to a temporary file
-        shutil.copyfileobj(upload_file.file, temp_file)
+        shutil.copyfileobj(upload_file, temp_file)
         temp_file_path = temp_file.name
-
     # Read PDF from the temporary file
     reader = PdfReader(temp_file_path)
     for page in reader.pages:
