@@ -27,10 +27,10 @@ voice_preset = "v2/en_speaker_6"
 
 processor = AutoProcessor.from_pretrained("suno/bark-small")
 
-from optimum.bettertransformer import BetterTransformer
+# from optimum.bettertransformer import BetterTransformer
 
-# Use bettertransform for flash attention
-model = BetterTransformer.transform(model, keep_original_model=True)
+# # Use bettertransform for flash attention
+# model = BetterTransformer.transform(model, keep_original_model=False)
 
 system_personality_prompt = """You are smart friendly and formal interviewer and i want you to have a human voice call type conversation via chat with me start out by introducing yourself as AI Interviewer called Vaato and then ask me following questions {interview_questions} or something you think would be interesting to ask based on the response of user\n\n"""
 # system_response_prompt="""Please respond only in JSON of format { type:"interviewer",message:"message1"} and only one message\n\n"""
