@@ -1,6 +1,9 @@
+import shutil
+from fastapi import UploadFile
 import numpy as np
 import openai
 from pypdf import PdfReader
+import tempfile
 
 # from src.processing.tts import reset_llms
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
@@ -42,21 +45,28 @@ def get_questions_from_resume(path_to_resume: str):
     return questions_text
 
 
-def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
-    # Read PDF
-    reader = PdfReader(path_to_resume)
-    resume_text = ""
-    for page in reader.pages:
-        resume_text += page.extract_text()
-        if reader.pages.index(page) + 1 != len(reader.pages):
-            resume_text += "\n\n"
+def read_pdf(upload_file: UploadFile) -> str:
+    text = ""
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        # Save uploaded file to a temporary file
+        shutil.copyfileobj(upload_file.file, temp_file)
+        temp_file_path = temp_file.name
 
-    reader = PdfReader(path_to_jd)
-    jd_text = ""
+    # Read PDF from the temporary file
+    reader = PdfReader(temp_file_path)
     for page in reader.pages:
-        jd_text += page.extract_text()
+        text += page.extract_text() or ""
         if reader.pages.index(page) + 1 != len(reader.pages):
-            jd_text += "\n\n"
+            text += "\n\n"
+
+    return text
+
+
+def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
+    # Read Resume
+    resume_text = read_pdf(path_to_resume)
+    # Read JD
+    jd_text = read_pdf(path_to_jd)
 
     # Get the questions from GPT-3
     api_response = openai.ChatCompletion.create(
@@ -88,7 +98,7 @@ def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
     return questions_text
 
 
-def process_resume_and_jd(resume_file, jd=None,questions=""):
+def process_resume_and_jd(resume_file, jd=None, questions=""):
     question_text = ""
     if jd == None or jd.filename == "":
         question_text = get_questions_from_resume(resume_file)
@@ -100,9 +110,11 @@ def process_resume_and_jd(resume_file, jd=None,questions=""):
     system_response_prompt = """Ask only one question per response"""
     system_message = system_personality_prompt + system_response_prompt
 
-    final_questions = questions + " and " + question_text if questions else question_text
-    system_message = system_message.replace("{interview_questions}",final_questions )
-    
+    final_questions = (
+        questions + " and " + question_text if questions else question_text
+    )
+    system_message = system_message.replace("{interview_questions}", final_questions)
+
     # out = chat(chat_messages)
     # ai_reply = json.loads(out.content)["message"]
     ai_reply: str = "Hi there this is Sam. Your AI Interviewer for today. Hope you are doing well. Shall we get started?"
