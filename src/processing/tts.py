@@ -30,7 +30,7 @@ processor = AutoProcessor.from_pretrained("suno/bark-small")
 from optimum.bettertransformer import BetterTransformer
 
 # Use bettertransform for flash attention
-model = BetterTransformer.transform(model, keep_original_model=False)
+model = BetterTransformer.transform(model, keep_original_model=True)
 
 system_personality_prompt = """You are smart friendly and formal interviewer and i want you to have a human voice call type conversation via chat with me start out by introducing yourself as AI Interviewer called Vaato and then ask me following questions {interview_questions} or something you think would be interesting to ask based on the response of user\n\n"""
 # system_response_prompt="""Please respond only in JSON of format { type:"interviewer",message:"message1"} and only one message\n\n"""
@@ -106,12 +106,14 @@ def do_text_to_speech(script):
 
     return audio_obj
 
+
 import collections
 import contextlib
 import sys
 import wave
 import webrtcvad
 from pydub import AudioSegment
+
 
 def read_wave(path):
     """Reads a .wav file.
@@ -198,7 +200,6 @@ def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, fram
 
     voiced_frames = []
     for frame in frames:
-        print(frame, type(frame))
         is_speech = vad.is_speech(frame.bytes, sample_rate)
 
         sys.stdout.write("1" if is_speech else "0")
