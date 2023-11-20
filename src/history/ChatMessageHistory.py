@@ -14,17 +14,14 @@ class ChatMessageHistoryWithJSON(ChatMessageHistory):
 
     def add_message(self, message: BaseMessage) -> None:
         self.timestamps.append(datetime.now(timezone.utc).astimezone().isoformat())
-        print(self.timestamps)
         return super().add_message(message)
 
     def add_ai_message(self, message: str) -> None:
         self.timestamps.append(datetime.now(timezone.utc).astimezone().isoformat())
-        print(self.timestamps)
         return super().add_ai_message(message)
 
     def add_user_message(self, message: str) -> None:
         self.timestamps.append(datetime.now(timezone.utc).astimezone().isoformat())
-        print(self.timestamps)
         return super().add_user_message(message)
 
     def to_json(self):

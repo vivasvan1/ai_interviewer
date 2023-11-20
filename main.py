@@ -69,7 +69,6 @@ async def process_resume(
     resume: UploadFile = Form(...), jd: UploadFile = None, questions: str = ""
 ):
     try:
-        print(resume.file, jd.file)
         ai_reply, question_text, system_message = process_resume_and_jd(
             resume.file, jd.file if jd else None, questions
         )

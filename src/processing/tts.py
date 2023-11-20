@@ -14,12 +14,16 @@ from langchain.chat_models import ChatOpenAI
 
 from transformers import BarkModel
 
-model = BarkModel.from_pretrained("suno/bark-small")
+model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16)
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+model = model.to(device)
+
+# Enable CPU offload
+model.enable_cpu_offload()
+
 import torch
 import webrtcvad
 
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
-model = model.to(device)
 
 from transformers import AutoProcessor
 
@@ -62,7 +66,7 @@ def do_text_to_speech(script):
         voice_preset = "v2/en_speaker_6"
 
         inputs = processor(text_prompt, voice_preset=voice_preset).to(device)
-        output = model.generate(**inputs)
+        output = model.generate(**inputs, do_sample=True)
 
     for sentence in output:
         # audio_array = generate_audio(sentence, history_prompt=SPEAKER)
