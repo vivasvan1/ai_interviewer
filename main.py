@@ -69,6 +69,7 @@ async def process_resume(
     resume: UploadFile = Form(...), jd: UploadFile = None, questions: str = ""
 ):
     try:
+        print(resume.file, jd.file)
         ai_reply, question_text, system_message = process_resume_and_jd(
             resume.file, jd.file if jd else None, questions
         )
@@ -81,7 +82,7 @@ async def process_resume(
         return {"response": ai_response_base64, "history": history.to_json()}
 
     except Exception as e:
-        raise HTTPException(detail=str(e), status_code=400)
+        raise HTTPException(detail=str(e.with_traceback()), status_code=400)
 
 
 @app.post(
