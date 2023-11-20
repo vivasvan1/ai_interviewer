@@ -99,7 +99,7 @@ def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
 
 def process_resume_and_jd(resume_file, jd=None, questions=""):
     question_text = ""
-    if jd == None or jd.filename == "":
+    if jd == None:
         question_text = get_questions_from_resume(resume_file)
     else:
         question_text = get_questions_from_resume_and_jd(resume_file, jd)
