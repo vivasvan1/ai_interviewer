@@ -94,7 +94,7 @@ def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
     else:
         print("Failed to get a valid response.")
 
-    return questions_text
+        return questions_text
 
 
 basic_questions = """Can you tell me about yourself?
@@ -114,9 +114,9 @@ def process_resume_and_jd(resume_file=None, jd=None, questions=""):
     if (jd == None) and (resume_file == None):
         question_text = basic_questions
     elif (jd == None) and (resume_file != None):
-    question_text = get_questions_from_resume(resume_file)
+        question_text = get_questions_from_resume(resume_file)
     elif (jd != None) and (resume_file == None):
-    question_text = get_questions_from_resume(jd)
+        question_text = get_questions_from_resume(jd)
     else:
         question_text = get_questions_from_resume_and_jd(resume_file, jd)
 
