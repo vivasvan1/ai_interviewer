@@ -15,12 +15,9 @@ from langchain.chat_models import ChatOpenAI
 
 from transformers import BarkModel
 
-# model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16)
-# device = "cuda:0" if torch.cuda.is_available() else "cpu"
-# model = model.to(device)
-
-# Enable CPU offload
-# model.enable_cpu_offload()
+# bark_model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16)
+# processing_device = "cuda:0" if torch.cuda.is_available() else "cpu"
+# bark_model = bark_model.to(processing_device)
 
 import torch
 import webrtcvad
@@ -28,9 +25,9 @@ import webrtcvad
 
 # from transformers import AutoProcessor
 
-# voice_preset = "v2/en_speaker_6"
+# voice_preset_id = "v2/en_speaker_6"
 
-# processor = AutoProcessor.from_pretrained("suno/bark-small")
+# audio_processor = AutoProcessor.from_pretrained("suno/bark-small")
 
 # from optimum.bettertransformer import BetterTransformer
 
@@ -49,95 +46,95 @@ system_response_prompt = """Ask only one question per response"""
 
 #   chat_messages = [SystemMessage(content=system_personality_prompt+system_response_prompt)]
 
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
+processing_processing_device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 from pathlib import Path
 import openai
 
 import requests
 
-url = "https://api.openai.com/v1/audio/speech"
-headers = {
+api_url = "https://api.openai.com/v1/audio/speech"
+api_headers = {
     "Authorization": "Bearer " + os.getenv("OPENAI_API_KEY"),
     "Content-Type": "application/json",
 }
 
 
 def do_text_to_speech(script):
-    data = {
+    request_data = {
         "model": "tts-1",
-        "input": script,
+        "input": text_script,
         "voice": "alloy",
     }
 
-    response = requests.post(url, headers=headers, json=data)
+    api_response = requests.post(api_url, headers=api_headers, json=request_data)
 
-    if response.status_code == 200:
-        return response.content
-        # with open("speech.mp3", "wb") as output_file:
-        #     output_file.write(response.content)
+    if api_response.status_code == 200:
+        return api_response.content
+        # with open("speech.mp3", "wb") as output_file_path:
+        #     output_file_path.write(api_response.content)
     else:
-        print(f"Request failed with status code {response.status_code}")
-        print(response.text)
+        print(f"Request failed with status code {api_response.status_code}")
+        print(api_response.text)
         return None
 
-    # sentences = nltk.sent_tokenize(script)
+    # sentences = nltk.sent_tokenize(text_script)
 
-    # SPEAKER = "v2/en_speaker_6"
-    # SAMPLE_RATE = model.generation_config.sample_rate
+    # speaker_id = "v2/en_speaker_6"
+    # sample_rate = bark_model.generation_config.sample_rate
 
-    # silence = np.zeros(int(0.25 * SAMPLE_RATE))  # quarter second of silence
+    # silence_duration = np.zeros(int(0.25 * sample_rate))  # quarter second of silence
 
-    # pieces = []
+    # audio_pieces = []
 
     # with torch.inference_mode():
-    #     text_prompt = sentences
-    #     voice_preset = "v2/en_speaker_6"
+    #     text_input = sentences
+    #     voice_preset_id = "v2/en_speaker_6"
 
-    #     inputs = processor(text_prompt, voice_preset=voice_preset).to(device)
-    #     output = model.generate(**inputs, do_sample=True)
+    #     inputs = audio_processor(text_input, voice_preset=voice_preset_id).to(processing_device)
+    #     output = bark_model.generate(**inputs, do_sample=True)
 
     # for sentence in output:
-    #     # audio_array = generate_audio(sentence, history_prompt=SPEAKER)
-    #     pieces += [sentence.cpu().numpy(), silence.copy()]
+    #     # audio_data_array = generate_audio(sentence, history_prompt=speaker_id)
+    #     audio_pieces += [sentence.cpu().numpy(), silence_duration.copy()]
 
-    # ai_audio_obj = Audio(data=np.concatenate(pieces), rate=SAMPLE_RATE)
+    # ai_audio_object = Audio(data=np.concatenate(audio_pieces), rate=sample_rate)
     # with open("/tmp/test.wav", "wb") as f:
-    #     f.write(ai_audio_obj.data)
+    #     f.write(ai_audio_object.data)
 
-    # audio, sample_rate = read_wave("/tmp/test.wav")
-    # vad = webrtcvad.Vad()
-    # frames = frame_generator(30, audio, sample_rate)
-    # frames = list(frames)
-    # segments = vad_collector(sample_rate, 30, 300, vad, frames)
+    # audio_data, audio_sample_rate = read_wave("/tmp/test.wav")
+    # voice_activity_detector = webrtcvad.Vad()
+    # audio_frames = frame_generator(30, audio_data, audio_sample_rate)
+    # audio_frames = list(audio_frames)
+    # audio_segments = vad_collector(audio_sample_rate, 30, 300, voice_activity_detector, audio_frames)
 
     # # Segmenting the Voice audio and save it in list as bytes
-    # concataudio = [segment for segment in segments]
+    # concatenated_audio = [segment for segment in audio_segments]
 
-    # joinedaudio = b"".join(concataudio)
-    # audio_array = np.frombuffer(joinedaudio, dtype=np.int16)
-    # audio_obj = Audio(data=audio_array, rate=16000)
-    # # vad = webrtcvad.Vad()
+    # joined_audio = b"".join(concatenated_audio)
+    # audio_data_array = np.frombuffer(joined_audio, dtype=np.int16)
+    # audio_object = Audio(data=audio_data_array, rate=16000)
+    # # voice_activity_detector = webrtcvad.Vad()
 
     # # # Define frame duration and padding duration
     # # frame_duration_ms = 30
     # # padding_duration_ms = 300
 
     # # # Apply VAD collector directly to ai_audio_obj
-    # # frames = frame_generator(frame_duration_ms, ai_audio_obj.data, SAMPLE_RATE)
-    # # frames = list(frames)
-    # # segments = vad_collector(
-    # #     SAMPLE_RATE, frame_duration_ms, padding_duration_ms, vad, frames
+    # # audio_frames = frame_generator(frame_duration_ms, ai_audio_object.data, sample_rate)
+    # # audio_frames = list(audio_frames)
+    # # audio_segments = vad_collector(
+    # #     sample_rate, frame_duration_ms, padding_duration_ms, voice_activity_detector, audio_frames
     # # )
 
     # # # Segmenting the voice audio and save it in a list as bytes
-    # # concataudio = [segment for segment in segments]
+    # # concatenated_audio = [segment for segment in audio_segments]
 
-    # # joinedaudio = b"".join([frame.data.tobytes() for frame in concataudio])
-    # # audio_array = np.frombuffer(joinedaudio, dtype=np.int16)
-    # # audio_obj = Audio(data=audio_array, rate=SAMPLE_RATE)
+    # # joined_audio = b"".join([frame.data.tobytes() for frame in concatenated_audio])
+    # # audio_data_array = np.frombuffer(joined_audio, dtype=np.int16)
+    # # audio_object = Audio(data=audio_data_array, rate=sample_rate)
 
-    # return audio_obj
+    # return audio_object
 
 
 import collections
@@ -161,11 +158,11 @@ def read_wave(path):
         assert num_channels == 1
         sample_width = wf.getsampwidth()
         assert sample_width == 2
-        sample_rate = wf.getframerate()
+        audio_sample_rate = wf.getframerate()
 
-        assert sample_rate in (8000, 16000, 32000, 48000)
+        assert audio_sample_rate in (8000, 16000, 32000, 48000)
         pcm_data = wf.readframes(wf.getnframes())
-        return pcm_data, sample_rate
+        return pcm_data, audio_sample_rate
 
 
 def write_wave(path, audio, sample_rate):
@@ -175,8 +172,8 @@ def write_wave(path, audio, sample_rate):
     with contextlib.closing(wave.open(path, "wb")) as wf:
         wf.setnchannels(1)
         wf.setsampwidth(2)
-        wf.setframerate(sample_rate)
-        wf.writeframes(audio)
+        wf.setframerate(audio_sample_rate)
+        wf.writeframes(audio_data)
 
 
 class Frame(object):
@@ -194,12 +191,12 @@ def frame_generator(frame_duration_ms, audio, sample_rate):
     the sample rate.
     Yields Frames of the requested duration.
     """
-    n = int(sample_rate * (frame_duration_ms / 1000.0) * 2)
+    n = int(audio_sample_rate * (frame_duration_ms / 1000.0) * 2)
     offset = 0
     timestamp = 0.0
-    duration = (float(n) / sample_rate) / 2.0
-    while offset + n < len(audio):
-        yield Frame(audio[offset : offset + n], timestamp, duration)
+    duration = (float(n) / audio_sample_rate) / 2.0
+    while offset + n < len(audio_data):
+        yield Frame(audio_data[offset : offset + n], timestamp, duration)
         timestamp += duration
         offset += n
 
@@ -217,11 +214,11 @@ def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, fram
     amount of silence or the beginnings/endings of speech around the
     voiced frames.
     Arguments:
-    sample_rate - The audio sample rate, in Hz.
+    audio_sample_rate - The audio sample rate, in Hz.
     frame_duration_ms - The frame duration in milliseconds.
     padding_duration_ms - The amount to pad the window, in milliseconds.
-    vad - An instance of webrtcvad.Vad.
-    frames - a source of audio frames (sequence or generator).
+    voice_activity_detector - An instance of webrtcvad.Vad.
+    audio_frames - a source of audio frames (sequence or generator).
     Returns: A generator that yields PCM audio data.
     """
     num_padding_frames = int(padding_duration_ms / frame_duration_ms)
@@ -232,8 +229,8 @@ def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, fram
     triggered = False
 
     voiced_frames = []
-    for frame in frames:
-        is_speech = vad.is_speech(frame.bytes, sample_rate)
+    for frame in audio_frames:
+        is_speech = voice_activity_detector.is_speech(frame.bytes, audio_sample_rate)
 
         sys.stdout.write("1" if is_speech else "0")
         if not triggered:
@@ -248,22 +245,22 @@ def vad_collector(sample_rate, frame_duration_ms, padding_duration_ms, vad, fram
                 # We want to yield all the audio we see from now until
                 # we are NOTTRIGGERED, but we have to start with the
                 # audio that's already in the ring buffer.
-                for f, s in ring_buffer:
-                    voiced_frames.append(f)
+                for frame, is_speech in ring_buffer:
+                    voiced_frames.append(frame)
                 ring_buffer.clear()
         else:
             # We're in the TRIGGERED state, so collect the audio data
             # and add it to the ring buffer.
             voiced_frames.append(frame)
             ring_buffer.append((frame, is_speech))
-            num_unvoiced = len([f for f, speech in ring_buffer if not speech])
+            num_unvoiced = len([frame for frame, is_speech in ring_buffer if not is_speech])
             # If more than 90% of the frames in the ring buffer are
             # unvoiced, then enter NOTTRIGGERED and yield whatever
             # audio we've collected.
             if num_unvoiced > 0.9 * ring_buffer.maxlen:
                 sys.stdout.write("-(%s)" % (frame.timestamp + frame.duration))
                 triggered = False
-                yield b"".join([f.bytes for f in voiced_frames])
+                yield b"".join([frame.bytes for frame in voiced_frames])
                 ring_buffer.clear()
                 voiced_frames = []
     if triggered:
