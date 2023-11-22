@@ -21,7 +21,7 @@ def get_questions_from_resume(path_to_resume: str):
         messages=[
             {
                 "role": "system",
-                "content": "You are an interviewer and given this document and i want you to provide me a list of relevant questions from it. ",
+                "content": "You are an interviewer and given this document and I want you to provide me a list of relevant questions from it. ",
             },
             {
                 "role": "user",
