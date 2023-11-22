@@ -48,7 +48,6 @@ system_response_prompt = """Ask only one question per response"""
 
 
 #   chat_messages = [SystemMessage(content=system_personality_prompt+system_response_prompt)]
-
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 from pathlib import Path
