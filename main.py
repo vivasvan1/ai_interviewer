@@ -66,7 +66,7 @@ class AIResponse(BaseModel):
     description="Process the uploaded resume (optionally a job description) and produce AI response",
 )
 async def process_resume(
-    resume: UploadFile = Form(...), jd: UploadFile = None, questions: str = ""
+    resume: UploadFile = None, jd: UploadFile = None, questions: str = ""
 ):
     try:
         ai_reply, question_text, system_message = process_resume_and_jd(

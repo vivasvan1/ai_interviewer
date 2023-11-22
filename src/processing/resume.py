@@ -21,11 +21,11 @@ def get_questions_from_resume(path_to_resume: str):
         messages=[
             {
                 "role": "system",
-                "content": "You are an interviewer and given my resume and i want you to provide me a list of relevant questions from it. ",
+                "content": "You are an interviewer and given this document and i want you to provide me a list of relevant questions from it. ",
             },
             {
                 "role": "user",
-                "content": f"Below is the resume of the candidate: {text}",
+                "content": f"Below is the content of the document: {text}",
             },
         ],
     )
@@ -97,10 +97,26 @@ def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
     return questions_text
 
 
-def process_resume_and_jd(resume_file, jd=None, questions=""):
+basic_questions = """Can you tell me about yourself?
+What are your strengths and weaknesses?
+Why do you want to work for this company?
+Can you describe a challenging situation you've faced at work and how you handled it?
+Where do you see yourself in five years?
+How do you handle stress and pressure?
+What is your greatest professional achievement?
+What is your preferred work style or work environment?
+Why should we hire you for this position?
+Do you have any questions for us?"""
+
+
+def process_resume_and_jd(resume_file=None, jd=None, questions=""):
     question_text = ""
-    if jd == None:
+    if (jd == None) and (resume_file == None):
+        question_text = basic_questions
+    elif (jd == None) and (resume_file != None):
         question_text = get_questions_from_resume(resume_file)
+    elif (jd != None) and (resume_file == None):
+        question_text = get_questions_from_resume(jd)
     else:
         question_text = get_questions_from_resume_and_jd(resume_file, jd)
 
@@ -110,8 +126,9 @@ def process_resume_and_jd(resume_file, jd=None, questions=""):
     system_message = system_personality_prompt + system_response_prompt
 
     final_questions = (
-        questions + " and " + question_text if questions else question_text
+        (questions + " and " + question_text) if questions else question_text
     )
+
     system_message = system_message.replace("{interview_questions}", final_questions)
 
     # out = chat(chat_messages)
