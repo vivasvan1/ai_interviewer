@@ -4,6 +4,7 @@ import numpy as np
 import nltk  # we'll use this to split into sentences
 
 nltk.download("punkt")
+import os
 
 from IPython.display import Audio
 import base64
@@ -14,22 +15,22 @@ from langchain.chat_models import ChatOpenAI
 
 from transformers import BarkModel
 
-model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16)
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
-model = model.to(device)
+# model = BarkModel.from_pretrained("suno/bark-small", torch_dtype=torch.float16)
+# device = "cuda:0" if torch.cuda.is_available() else "cpu"
+# model = model.to(device)
 
 # Enable CPU offload
-model.enable_cpu_offload()
+# model.enable_cpu_offload()
 
 import torch
 import webrtcvad
 
 
-from transformers import AutoProcessor
+# from transformers import AutoProcessor
 
-voice_preset = "v2/en_speaker_6"
+# voice_preset = "v2/en_speaker_6"
 
-processor = AutoProcessor.from_pretrained("suno/bark-small")
+# processor = AutoProcessor.from_pretrained("suno/bark-small")
 
 # from optimum.bettertransformer import BetterTransformer
 
@@ -50,65 +51,93 @@ system_response_prompt = """Ask only one question per response"""
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
+from pathlib import Path
+import openai
+
+import requests
+
+url = "https://api.openai.com/v1/audio/speech"
+headers = {
+    "Authorization": "Bearer " + os.getenv("OPENAI_API_KEY"),
+    "Content-Type": "application/json",
+}
+
 
 def do_text_to_speech(script):
-    sentences = nltk.sent_tokenize(script)
+    data = {
+        "model": "tts-1",
+        "input": script,
+        "voice": "alloy",
+    }
 
-    SPEAKER = "v2/en_speaker_6"
-    SAMPLE_RATE = model.generation_config.sample_rate
+    response = requests.post(url, headers=headers, json=data)
 
-    silence = np.zeros(int(0.25 * SAMPLE_RATE))  # quarter second of silence
+    if response.status_code == 200:
+        return response.content
+        # with open("speech.mp3", "wb") as output_file:
+        #     output_file.write(response.content)
+    else:
+        print(f"Request failed with status code {response.status_code}")
+        print(response.text)
+        return None
 
-    pieces = []
+    # sentences = nltk.sent_tokenize(script)
 
-    with torch.inference_mode():
-        text_prompt = sentences
-        voice_preset = "v2/en_speaker_6"
+    # SPEAKER = "v2/en_speaker_6"
+    # SAMPLE_RATE = model.generation_config.sample_rate
 
-        inputs = processor(text_prompt, voice_preset=voice_preset).to(device)
-        output = model.generate(**inputs, do_sample=True)
+    # silence = np.zeros(int(0.25 * SAMPLE_RATE))  # quarter second of silence
 
-    for sentence in output:
-        # audio_array = generate_audio(sentence, history_prompt=SPEAKER)
-        pieces += [sentence.cpu().numpy(), silence.copy()]
+    # pieces = []
 
-    ai_audio_obj = Audio(data=np.concatenate(pieces), rate=SAMPLE_RATE)
-    with open("/tmp/test.wav", "wb") as f:
-        f.write(ai_audio_obj.data)
+    # with torch.inference_mode():
+    #     text_prompt = sentences
+    #     voice_preset = "v2/en_speaker_6"
 
-    audio, sample_rate = read_wave("/tmp/test.wav")
-    vad = webrtcvad.Vad()
-    frames = frame_generator(30, audio, sample_rate)
-    frames = list(frames)
-    segments = vad_collector(sample_rate, 30, 300, vad, frames)
+    #     inputs = processor(text_prompt, voice_preset=voice_preset).to(device)
+    #     output = model.generate(**inputs, do_sample=True)
 
-    # Segmenting the Voice audio and save it in list as bytes
-    concataudio = [segment for segment in segments]
+    # for sentence in output:
+    #     # audio_array = generate_audio(sentence, history_prompt=SPEAKER)
+    #     pieces += [sentence.cpu().numpy(), silence.copy()]
 
-    joinedaudio = b"".join(concataudio)
-    audio_array = np.frombuffer(joinedaudio, dtype=np.int16)
-    audio_obj = Audio(data=audio_array, rate=16000)
+    # ai_audio_obj = Audio(data=np.concatenate(pieces), rate=SAMPLE_RATE)
+    # with open("/tmp/test.wav", "wb") as f:
+    #     f.write(ai_audio_obj.data)
+
+    # audio, sample_rate = read_wave("/tmp/test.wav")
     # vad = webrtcvad.Vad()
-
-    # # Define frame duration and padding duration
-    # frame_duration_ms = 30
-    # padding_duration_ms = 300
-
-    # # Apply VAD collector directly to ai_audio_obj
-    # frames = frame_generator(frame_duration_ms, ai_audio_obj.data, SAMPLE_RATE)
+    # frames = frame_generator(30, audio, sample_rate)
     # frames = list(frames)
-    # segments = vad_collector(
-    #     SAMPLE_RATE, frame_duration_ms, padding_duration_ms, vad, frames
-    # )
+    # segments = vad_collector(sample_rate, 30, 300, vad, frames)
 
-    # # Segmenting the voice audio and save it in a list as bytes
+    # # Segmenting the Voice audio and save it in list as bytes
     # concataudio = [segment for segment in segments]
 
-    # joinedaudio = b"".join([frame.data.tobytes() for frame in concataudio])
+    # joinedaudio = b"".join(concataudio)
     # audio_array = np.frombuffer(joinedaudio, dtype=np.int16)
-    # audio_obj = Audio(data=audio_array, rate=SAMPLE_RATE)
+    # audio_obj = Audio(data=audio_array, rate=16000)
+    # # vad = webrtcvad.Vad()
 
-    return audio_obj
+    # # # Define frame duration and padding duration
+    # # frame_duration_ms = 30
+    # # padding_duration_ms = 300
+
+    # # # Apply VAD collector directly to ai_audio_obj
+    # # frames = frame_generator(frame_duration_ms, ai_audio_obj.data, SAMPLE_RATE)
+    # # frames = list(frames)
+    # # segments = vad_collector(
+    # #     SAMPLE_RATE, frame_duration_ms, padding_duration_ms, vad, frames
+    # # )
+
+    # # # Segmenting the voice audio and save it in a list as bytes
+    # # concataudio = [segment for segment in segments]
+
+    # # joinedaudio = b"".join([frame.data.tobytes() for frame in concataudio])
+    # # audio_array = np.frombuffer(joinedaudio, dtype=np.int16)
+    # # audio_obj = Audio(data=audio_array, rate=SAMPLE_RATE)
+
+    # return audio_obj
 
 
 import collections
