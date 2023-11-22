@@ -26,7 +26,6 @@ from src.routes.interview import analysis
 
 
 # Preload AI models
-# preload_models(True, True, True, True, True, True, True, False)
 stt_model = whisper.load_model("small")
 
 app = FastAPI()
