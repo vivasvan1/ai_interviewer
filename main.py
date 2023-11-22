@@ -70,7 +70,7 @@ async def process_resume(
 ):
     try:
         ai_reply, question_text, system_message = process_resume_and_jd(
-            resume.file, jd.file if jd else None, questions
+            resume.file if resume else None, jd.file if jd else None, questions
         )
         history = ChatMessageHistoryWithJSON(timestamps=[])
         history.add_message(SystemMessage(content=system_message))
