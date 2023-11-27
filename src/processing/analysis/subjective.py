@@ -7,7 +7,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage, HumanMessage, SystemMessage, BaseMessage
 
 
-def generate_positive_analysis(
+def generate_positive_analysis_case(
     history: ChatMessageHistoryWithJSON,
 ):
     chat = ChatOpenAI(temperature=0.3, openai_api_key=os.environ.get("OPENAI_API_KEY"))
