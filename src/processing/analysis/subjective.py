@@ -3,6 +3,7 @@ import os
 import openai
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 
+from src.config.constants import POSITIVE_ANALYSIS_PROMPT
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import AIMessage, HumanMessage, SystemMessage, BaseMessage
 
@@ -16,7 +17,7 @@ def generate_positive_analysis(
     messages: list[BaseMessage] = []
     messages.append(
         SystemMessage(
-            content="""given a transcript of an interview i want you to tell me 5 skills the candidate have. please respond in JSON with format {"skills":[{"skill":<skill>,"reason":<reason>}]}"""
+            content=POSITIVE_ANALYSIS_PROMPT
         )
     )
     messages.append(HumanMessage(content=history.to_json()))
