@@ -1,4 +1,5 @@
 # import base64
+from src.config.constants import SYSTEM_PERSONALITY_PROMPT
 import os
 
 # import whisper
