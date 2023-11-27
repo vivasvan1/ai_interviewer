@@ -3,9 +3,10 @@ import os
 
 import openai
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import AIMessage, BaseMessage, HumanMessage, SystemMessage
-
-from src.config.constants import POSITIVE_ANALYSIS_PROMPT
+from langchain.schema import (AIMessage, BaseMessage, HumanMessage,
+                              SystemMessage)
+from src.config.constants import (IMPROVEMENT_ANALYSIS_PROMPT,
+                                  POSITIVE_ANALYSIS_PROMPT)
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 
 
@@ -43,9 +44,7 @@ def generate_improvement_analysis(
     # client = openai.Client(api_key=os.environ.get("OPENAI_API_KEY", ""))
     messages: list[BaseMessage] = []
     messages.append(
-        SystemMessage(
-            content="""given a transcript of an interview i want you to tell me 5 things the candidate can improve upon. please respond in JSON with format {"points":[{"point":<point_name>,"reason":<reason>}]}"""
-        )
+        SystemMessage(content=IMPROVEMENT_ANALYSIS_PROMPT)
     )
     messages.append(HumanMessage(content=history.to_json()))
 
