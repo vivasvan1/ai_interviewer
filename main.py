@@ -5,6 +5,28 @@ from os.path import dirname, join
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from langchain.schema import SystemMessage
+from src.agent.simple import process_user_response
+from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
+from src.processing.resume import process_resume_and_jd
+from src.processing.tts import do_text_to_speech
+
+logging.basicConfig(level=logging.INFO)
+=======
+import logging
+import os
+from os.path import dirname, join
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from langchain.schema import SystemMessage
+from src.agent.simple import process_user_response
+from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
+from src.processing.resume import process_resume_and_jd
+from src.processing.tts import do_text_to_speech
+
+logging.basicConfig(level=logging.INFO)
 
 =======
 import logging
@@ -20,6 +42,14 @@ from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 from src.processing.resume import process_resume_and_jd
 from src.processing.tts import do_text_to_speech
 
+logging.basicConfig(level=logging.INFO)
+import os
+from os.path import dirname, join
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+
+=======
 logging.basicConfig(level=logging.INFO)
 
 from src.brokers import email
@@ -87,7 +117,22 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
 
+=======
+import logging
+
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+
+=======
+    "http://localhost:3000",
+    "https://ai-interviewer-two.vercel.app",
+    "https://vaato.vercel.app",
+    "https://vaato.ultimateworld.io",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
 
 =======
     "http://localhost:3000",
