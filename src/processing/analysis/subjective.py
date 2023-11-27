@@ -1,11 +1,12 @@
 import json
 import os
+
 import openai
-from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
 from src.config.constants import POSITIVE_ANALYSIS_PROMPT
-from langchain.chat_models import ChatOpenAI
-from langchain.schema import AIMessage, HumanMessage, SystemMessage, BaseMessage
+from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 
 
 def generate_positive_analysis(
@@ -15,11 +16,7 @@ def generate_positive_analysis(
 
     # client = openai.Client(api_key=os.environ.get("OPENAI_API_KEY", ""))
     messages: list[BaseMessage] = []
-    messages.append(
-        SystemMessage(
-            content=POSITIVE_ANALYSIS_PROMPT
-        )
-    )
+    messages.append(SystemMessage(content=POSITIVE_ANALYSIS_PROMPT))
     messages.append(HumanMessage(content=history.to_json()))
     out = chat(messages)
 
