@@ -24,7 +24,6 @@ from src.routes.interview import analysis
 from src.utils.audio import convert_audio_to_base64
 
 # Preload AI models
-# stt_model = whisper.load_model("small")
 
 app = FastAPI()
 
@@ -76,7 +75,6 @@ async def process_resume(
 
         ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply))
         return {"response": ai_response_base64, "history": history.to_json()}
-
     except Exception as e:
         raise HTTPException(detail=str(e.with_traceback()), status_code=400)
 
