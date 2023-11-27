@@ -1,5 +1,17 @@
 import logging
+import os
+from os.path import dirname, join
 
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+
+=======
+import logging
+import os
+from os.path import dirname, join
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.schema import SystemMessage
@@ -64,6 +76,20 @@ app.include_router(email.router)
 
 
 origins = [
+    "http://localhost:3000",
+    "https://ai-interviewer-two.vercel.app",
+    "https://vaato.vercel.app",
+    "https://vaato.ultimateworld.io",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+
+=======
     "http://localhost:3000",
     "https://ai-interviewer-two.vercel.app",
     "https://vaato.vercel.app",
