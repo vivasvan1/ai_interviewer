@@ -1,11 +1,12 @@
+from src.history.ChatMessageHistory import HumanMessage
+from main import SystemMessage
+from src.history.ChatMessageHistory import BaseMessage
 import json
 import os
 import openai
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import AIMessage, HumanMessage, SystemMessage, BaseMessage
-
 
 def generate_positive_analysis(
     history: ChatMessageHistoryWithJSON,
