@@ -1,10 +1,13 @@
-import base64
+# import base64
 import os
-import whisper
+
+# import whisper
 
 from langchain.schema import AIMessage, HumanMessage, SystemMessage, BaseMessage
-from IPython.display import Audio
+
+# from IPython.display import Audio
 from langchain.chat_models import ChatOpenAI
+import requests
 
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 
@@ -19,7 +22,7 @@ chat_messages: list[BaseMessage] = [
 ]
 
 
-stt_model = whisper.load_model("small")
+# stt_model = whisper.load_model("small")
 
 
 def conversation(message: str, chat_messages: list[BaseMessage]) -> str:
@@ -32,12 +35,41 @@ def conversation(message: str, chat_messages: list[BaseMessage]) -> str:
 def process_user_response(audio_data, history: ChatMessageHistoryWithJSON):
     # audio_data = base64.b64decode(user_response_file)
     # human_audio_obj = Audio(audio_data, rate=SAMPLE_RATE)
-    with open(f"tmp_human.wav", "wb") as f:
-        f.write(audio_data)
-    human_reply = stt_model.transcribe(f"tmp_human.wav")
-    human_reply_text = human_reply["text"]
-    history.add_user_message(human_reply_text)
-    ai_reply: str = conversation(human_reply_text, history.messages)
-    history.add_ai_message(ai_reply)
+    # with open(f"tmp_human.wav", "wb") as f:
+    #     f.write(audio_data)
 
-    return ai_reply
+    try:
+        human_reply_text = speech_to_text(audio_data)
+
+        # human_reply = stt_model.transcribe(f"tmp_human.wav")
+
+        # human_reply_text = human_reply
+        history.add_user_message(human_reply_text)
+        ai_reply: str = conversation(human_reply_text, history.messages)
+        history.add_ai_message(ai_reply)
+
+        return ai_reply
+    except Exception as e:
+        raise e
+
+
+def speech_to_text(audio_data):
+    url = "https://api.openai.com/v1/audio/transcriptions"
+    headers = {
+        "Authorization": "Bearer " + os.environ.get("OPENAI_API_KEY"),
+    }
+    files = {
+        "file": ("openai.mp3", audio_data),
+    }
+    data = {
+        "model": "whisper-1",
+    }
+
+    response = requests.post(url, headers=headers, files=files, data=data)
+
+    if response.status_code == 200:
+        transcription_data = response.json()
+        return transcription_data["text"]
+    else:
+        print(f"Request failed with status code {response.status_code}")
+        response.raise_for_status()
