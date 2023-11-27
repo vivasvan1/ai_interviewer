@@ -3,8 +3,8 @@ import os
 
 import openai
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import AIMessage, BaseMessage, HumanMessage, SystemMessage
-
+from langchain.schema import (AIMessage, BaseMessage, HumanMessage,
+                              SystemMessage)
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 
 
@@ -38,7 +38,7 @@ def generate_positive_analysis_case(
     return r
 
 
-def generate_improvement_analysis(
+def generate_improvement_analysis_case(
     history: ChatMessageHistoryWithJSON,
 ):
     chat = ChatOpenAI(temperature=0.3, openai_api_key=os.environ.get("OPENAI_API_KEY"))
@@ -61,7 +61,6 @@ def generate_improvement_analysis(
     #         messages.append({"role": "assistant", "content": message.content})
     #     elif message.type == "human":
     #         messages.append({"role": "user", "content": message.content})
-
     # response = client.chat.completions.create(
     #     model="gpt-3.5-turbo",
     #     messages=[
