@@ -39,7 +39,7 @@ def get_questions_from_resume(path_to_resume: str):
     else:
         print("Failed to get a valid response.")
 
-    return questions_text
+        return questions_text
 
 
 def read_pdf(upload_file: str) -> str:
@@ -56,8 +56,6 @@ def read_pdf(upload_file: str) -> str:
             text += "\n\n"
 
     return text
-
-
 def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
     # Read Resume
     resume_text = read_pdf(path_to_resume)
@@ -91,7 +89,7 @@ def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
     else:
         print("Failed to get a valid response.")
 
-    return questions_text
+        return questions_text
 
 
 basic_questions = """Can you tell me about yourself?
