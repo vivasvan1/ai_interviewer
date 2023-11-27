@@ -4,7 +4,6 @@ FROM python
 WORKDIR /app
 
 # Install Git
-# RUN apt-get update && apt-get install -y git
 
 # Copy requirements.txt to the container
 COPY requirements.txt .
