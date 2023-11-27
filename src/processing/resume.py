@@ -1,12 +1,9 @@
 import shutil
-from fastapi import UploadFile
-import numpy as np
 import openai
 from pypdf import PdfReader
 import tempfile
 
 # from src.processing.tts import reset_llms
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
 
 def get_questions_from_resume(path_to_resume: str):
@@ -21,7 +18,7 @@ def get_questions_from_resume(path_to_resume: str):
         messages=[
             {
                 "role": "system",
-                "content": "You are an interviewer and given this document and i want you to provide me a list of relevant questions from it. ",
+                "content": "You are an interviewer and given a document and i want you to provide me a list of 8-10 questions which an interviewer will ask the interviewee.Question should be from the perspective to interviewer towards interviewee. Return comma separated questions and without serial numbers",
             },
             {
                 "role": "user",
@@ -73,7 +70,7 @@ def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
         messages=[
             {
                 "role": "system",
-                "content": "You are an interviewer and given a job description and my resume and i want you to provide me a list of 10 relevant questions starting 3 questions from my resume and then rest from job description. Return JSON output of structure \{ questions:[{question_text:string}] \}",
+                "content": "You are an interviewer and given a job description and my resume and i want you to provide me a list of 8-10 questions which an interviewer will ask the interviewee. Question should be from the perspective to interviewer towards interviewee. Return comma separated questions and without serial numbers",
             },
             {
                 "role": "user",
