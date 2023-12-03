@@ -17,7 +17,7 @@ def generate_positive_analysis_case(
     messages: list[BaseMessage] = []
     messages.append(
         SystemMessage(
-            content="""given a transcript of an interview i want you to tell me 5 skills the candidate have. please respond in JSON with format {"skills":[{"skill":<skill>,"reason":<reason>}]}"""
+            content="""given a transcript of an interview i want you to tell me 5 skills the candidate have. please respond in JSON with format {"skills":[{"skill":<skill>,"reason":<reason>}]}. If not enough data or improper candidate response return {"skills":[]}"""
         )
     )
     messages.append(HumanMessage(content=history.to_json()))
