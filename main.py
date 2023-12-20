@@ -165,7 +165,10 @@ from src.utils.audio import convert_audio_to_base64
 
 # Preload AI models
 
-app = FastAPI()
+app = FastAPI(
+    title="Vaato Backend",
+    version="1.0.1",
+)
 
 app.include_router(analysis.router)
 app.include_router(email.router)
@@ -202,11 +205,15 @@ class AIResponse(BaseModel):
     description="Process the uploaded resume (optionally a job description) and produce AI response",
 )
 async def process_resume(
-    resume: UploadFile = None, jd: UploadFile = None, questions: str = ""
+    resume: UploadFile = None,resumeText: str = None, jd: UploadFile = None,jdText: str = None, questions: str = ""
 ):
-    try:
+    try:    
         ai_reply, question_text, system_message = process_resume_and_jd(
-            resume.file if resume else None, jd.file if jd else None, questions
+            resume.file if resume else None, 
+            jd.file if jd else None,
+            resumeText,
+            jdText,
+            questions
         )
         history = ChatMessageHistoryWithJSON(timestamps=[])
         history.add_message(SystemMessage(content=system_message))
