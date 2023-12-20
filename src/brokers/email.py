@@ -2,18 +2,18 @@ import os
 import smtplib
 from email.message import EmailMessage
 from typing import Optional
-from fastapi import APIRouter, BackgroundTasks, Form
+from fastapi import APIRouter, BackgroundTasks, Body, Form
 
-# Configure your SMTP server settings here
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
-SMTP_USERNAME = "vivasvan@ultimateworld.io"
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD")
 
 router = APIRouter()
 
 
-async def send_email(email_message):
+async def send_email(email_message, smtp_username, smtp_password):
+    # Configure your SMTP server settings here
+    SMTP_SERVER = "smtp.gmail.com"
+    SMTP_PORT = 587
+    SMTP_USERNAME = smtp_username if smtp_username else "vivasvan@ultimateworld.io"
+    SMTP_PASSWORD = smtp_password if smtp_password else os.environ.get("SMTP_PASSWORD")
     try:
         # Connect to the SMTP server and send the email
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
@@ -30,6 +30,8 @@ async def send_email_background(
     recipient: str = Form(...),
     subject: str = Form(...),
     message_html: str = Form(...),
+    smtp_username: str = Body(default=None),
+    smtp_password: str = Body(default=None),
 ):
     # Create an EmailMessage object
     msg = EmailMessage()
@@ -44,5 +46,5 @@ async def send_email_background(
     msg["To"] = recipient
 
     # Send the email in the background
-    background_tasks.add_task(send_email, msg)
+    background_tasks.add_task(send_email, msg, smtp_username, smtp_password)
     return {"message": "Email sending task has been added to the background queue"}
