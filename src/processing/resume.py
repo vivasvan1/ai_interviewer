@@ -6,12 +6,7 @@ import tempfile
 # from src.processing.tts import reset_llms
 
 
-def get_questions_from_resume(path_to_resume: str):
-    # Read PDF
-    reader = PdfReader(path_to_resume)
-    page = reader.pages[0]
-    text = page.extract_text()
-
+def get_questions_from_file(text: str, document_name: str):
     # Get the questions from GPT-3
     api_response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -22,7 +17,7 @@ def get_questions_from_resume(path_to_resume: str):
             },
             {
                 "role": "user",
-                "content": f"Below is the content of the document: {text}",
+                "content": f"Below is the content of the {document_name}: {text}",
             },
         ],
     )
@@ -58,11 +53,11 @@ def read_pdf(upload_file: str) -> str:
     return text
 
 
-def get_questions_from_resume_and_jd(path_to_resume: str, path_to_jd: str):
-    # Read Resume
-    resume_text = read_pdf(path_to_resume)
-    # Read JD
-    jd_text = read_pdf(path_to_jd)
+def get_questions_from_resume_and_jd(resume_text: str, jd_text: str):
+    # # Read Resume
+    # resume_text = read_pdf(path_to_resume)
+    # # Read JD
+    # jd_text = read_pdf(path_to_jd)
 
     # Get the questions from GPT-3
     api_response = openai.ChatCompletion.create(
@@ -106,25 +101,67 @@ Why should we hire you for this position?
 Do you have any questions for us?"""
 
 
-def process_resume_and_jd(resume_file=None, jd=None, questions=""):
-    question_text = ""
-    if (jd == None) and (resume_file == None):
-        question_text = basic_questions
-    elif (jd == None) and (resume_file != None):
-        question_text = get_questions_from_resume(resume_file)
-    elif (jd != None) and (resume_file == None):
-        question_text = get_questions_from_resume(jd)
+def process_resume_and_jd(
+    resume_file=None, jd_file=None, resume_text=None, jd_text=None, questions=""
+):
+    final_questions = ""
+
+    # No info was provided set question to default
+    if (
+        resume_file == None
+        and resume_text == None
+        and jd_file == None
+        and jd_text == None
+        and questions == ""
+    ):
+        # Load Default Questions
+        final_questions = basic_questions
+
+    # Case: Some context was provided
     else:
-        question_text = get_questions_from_resume_and_jd(resume_file, jd)
+        # Combine resume_text and resume_file if any one or both available
+        full_resume_text = ""
+        if resume_file:
+            extracted_text = read_pdf(resume_file)
+            full_resume_text += extracted_text + "\n\n"
+        if resume_text:
+            full_resume_text += resume_text + "\n\n"
+
+        # Combine jd_text and jd_file if any one or both available
+        full_jd_text = ""
+        if jd_file:
+            extracted_text = read_pdf(jd_file)
+            full_jd_text += extracted_text + "\n\n"
+        if jd_text:
+            full_jd_text += jd_text + "\n\n"
+            
+        gen_question_text = ""
+        if (not full_resume_text) and (not full_jd_text):
+            # Direct Questions Provided.
+            pass
+        elif full_resume_text and (not full_jd_text):
+            # Generate Question from Resume.
+            gen_question_text = get_questions_from_file(full_resume_text, "resume")
+        elif full_jd_text and (not full_resume_text):
+            # Generate Question from JD.
+            gen_question_text = get_questions_from_file(full_jd_text, "job description")
+        else:
+            # Generate Question from Resume + JD.
+            gen_question_text = get_questions_from_resume_and_jd(
+                full_resume_text, full_jd_text
+            )
+
+        # Combine ProvidedQuestions with GeneratedQuestions
+        final_questions = (
+            (questions + " and " + gen_question_text)
+            if questions and gen_question_text
+            else (questions if not gen_question_text else gen_question_text)
+        )
 
     system_personality_prompt = """You are smart friendly and formal interviewer and i want you to have a human voice call type conversation via chat with me ask me following questions {interview_questions} or something you think would be interesting to ask based on the response of user\n\n"""
     # system_response_prompt="""Please respond only in JSON of format { type:"interviewer",message:"message1"} and only one message\n\n"""
     system_response_prompt = """Ask only one question per response"""
     system_message = system_personality_prompt + system_response_prompt
-
-    final_questions = (
-        (questions + " and " + question_text) if questions else question_text
-    )
 
     system_message = system_message.replace("{interview_questions}", final_questions)
 
@@ -132,4 +169,4 @@ def process_resume_and_jd(resume_file=None, jd=None, questions=""):
     # ai_reply = json.loads(out.content)["message"]
     ai_reply: str = "Hi there this is Sam. Your AI Interviewer for today. Hope you are doing well. Shall we get started?"
     # chat_messages.append(AIMessage(content=ai_reply))
-    return ai_reply, question_text, system_message
+    return ai_reply, final_questions, system_message
