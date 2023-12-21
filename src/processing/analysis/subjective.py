@@ -47,7 +47,7 @@ def generate_improvement_analysis(
     messages: list[BaseMessage] = []
     messages.append(
         SystemMessage(
-            content="""given a transcript of an interview i want you to tell me 5 things the candidate can improve upon. please respond in JSON with format {"points":[{"point":"valid_parsable_string","reason":"valid_parsable_string"}]}"""
+            content="""given a transcript of an interview i want you to tell me 5 things the candidate can improve upon. please respond in JSON with format {"points":[{"point":\"\"\"string\"\"\","reason":\"\"\"string\"\"\"}]}"""
         )
     )
     messages.append(HumanMessage(content=history.to_json()))
