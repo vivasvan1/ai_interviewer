@@ -11,13 +11,13 @@ from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 def generate_positive_analysis_case(
     history: ChatMessageHistoryWithJSON,
 ):
-    chat = ChatOpenAI(temperature=0.3, openai_api_key=os.environ.get("OPENAI_API_KEY"))
+    chat = ChatOpenAI(temperature=0.7, openai_api_key=os.environ.get("OPENAI_API_KEY"))
 
     # client = openai.Client(api_key=os.environ.get("OPENAI_API_KEY", ""))
     messages: list[BaseMessage] = []
     messages.append(
         SystemMessage(
-            content="""given a transcript of an interview i want you to tell me 5 skills the candidate have. please respond in JSON with format {"skills":[{"skill":<skill>,"reason":<reason>}]}. If not enough data or improper candidate response return {"skills":[]}"""
+            content="""given a transcript of an interview i want you to tell me 5 skills the candidate have. please respond in JSON with format {"skills":[{"skill":"valid_parsable_string","reason":"valid_parsable_string"}]}. If not enough data or improper candidate response return {"skills":[]}"""
         )
     )
     messages.append(HumanMessage(content=history.to_json()))
@@ -41,13 +41,13 @@ def generate_positive_analysis_case(
 def generate_improvement_analysis_case(
     history: ChatMessageHistoryWithJSON,
 ):
-    chat = ChatOpenAI(temperature=0.3, openai_api_key=os.environ.get("OPENAI_API_KEY"))
+    chat = ChatOpenAI(temperature=0.7, openai_api_key=os.environ.get("OPENAI_API_KEY"))
 
     # client = openai.Client(api_key=os.environ.get("OPENAI_API_KEY", ""))
     messages: list[BaseMessage] = []
     messages.append(
         SystemMessage(
-            content="""given a transcript of an interview i want you to tell me 5 things the candidate can improve upon. please respond in JSON with format {"points":[{"point":<point_name>,"reason":<reason>}]}"""
+            content="""given a transcript of an interview i want you to tell me 5 things the candidate can improve upon. please respond in JSON with format {"points":[{"point":"valid_parsable_string","reason":"valid_parsable_string"}]}"""
         )
     )
     messages.append(HumanMessage(content=history.to_json()))
