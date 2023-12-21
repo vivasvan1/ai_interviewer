@@ -6,7 +6,7 @@ dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
 # import base64
-from fastapi import FastAPI, UploadFile, Form, File, HTTPException
+from fastapi import Body, FastAPI, UploadFile, Form, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.schema import SystemMessage
 from src.agent.simple import process_user_response
@@ -17,7 +17,7 @@ from src.processing.tts import do_text_to_speech
 
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 from src.utils.audio import convert_audio_to_base64
 from src.brokers import email
@@ -67,7 +67,7 @@ class AIResponse(BaseModel):
     description="Process the uploaded resume (optionally a job description) and produce AI response",
 )
 async def process_resume(
-    resume: UploadFile = None,resumeText: str = None, jd: UploadFile = None,jdText: str = None, questions: str = ""
+    resume: UploadFile = None,resumeText: str = Body(default=None), jd: UploadFile = None,jdText: str = Body(default=None), questions: str = Body(default=None)
 ):
     try:    
         ai_reply, question_text, system_message = process_resume_and_jd(

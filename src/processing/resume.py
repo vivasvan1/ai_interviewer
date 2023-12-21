@@ -1,4 +1,5 @@
 from logging import debug, info
+import logging
 import shutil
 import openai
 from pypdf import PdfReader
@@ -16,7 +17,7 @@ def get_questions_from_file(text: str, document_name: str):
         messages=[
             {
                 "role": "system",
-                "content": f"You are an interviewer and given this document and i want you to provide me a list of relevant questions from it. ",
+                "content": f"You are an interviewer and given this document and i want you to provide me a list of questions. ",
             },
             {
                 "role": "user",
@@ -64,7 +65,7 @@ def get_questions_from_resume_and_jd(resume_text: str, jd_text: str):
         messages=[
             {
                 "role": "system",
-                "content": "You are an interviewer and given these documents and i want you to provide me a list of relevant questions from it. ",
+                "content": "You are an interviewer and given these documents and i want you to provide me a list of questions from it. ",
             },
             {
                 "role": "user",
@@ -100,7 +101,7 @@ Do you have any questions for us?"""
 
 
 def process_resume_and_jd(
-    resume_file=None, jd_file=None, resume_text=None, jd_text=None, questions=""
+    resume_file=None, jd_file=None, resume_text=None, jd_text=None, questions=None
 ):
     final_questions = ""
 
@@ -110,7 +111,7 @@ def process_resume_and_jd(
         and resume_text == None
         and jd_file == None
         and jd_text == None
-        and questions == ""
+        and questions == None
     ):
         # Load Default Questions
         final_questions = basic_questions
@@ -142,7 +143,7 @@ def process_resume_and_jd(
             gen_question_text = get_questions_from_file(full_resume_text, "resume")
         elif full_jd_text and (not full_resume_text):
             # Generate Question from JD.
-            gen_question_text = get_questions_from_file(full_jd_text, "job description")
+            gen_question_text = get_questions_from_file(full_jd_text, "interview context")
         else:
             # Generate Question from Resume + JD.
             gen_question_text = get_questions_from_resume_and_jd(
@@ -155,7 +156,7 @@ def process_resume_and_jd(
             if questions and gen_question_text
             else (questions if not gen_question_text else gen_question_text)
         )
-    debug(final_questions, "final_questions")
+    debug("final_questions : "+ str(final_questions))
     system_personality_prompt = """You are smart friendly and formal interviewer and i want you to have a human voice call type conversation via chat with me ask me following questions {interview_questions} or something you think would be interesting to ask based on the response of user\n\n"""
     # system_response_prompt="""Please respond only in JSON of format { type:"interviewer",message:"message1"} and only one message\n\n"""
     system_response_prompt = """Ask only one question per response"""
