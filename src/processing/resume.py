@@ -1,23 +1,26 @@
+from logging import debug, info
 import shutil
 import openai
 from pypdf import PdfReader
 import tempfile
+import fitz
 
 # from src.processing.tts import reset_llms
 
 
 def get_questions_from_file(text: str, document_name: str):
+    debug("Text of document", document_name, " = ", text)
     # Get the questions from GPT-3
     api_response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {
                 "role": "system",
-                "content": "You are an interviewer and given a document and i want you to provide me a list of 8-10 questions which an interviewer will ask the interviewee.Question should be from the perspective to interviewer towards interviewee. Return comma separated questions and without serial numbers",
+                "content": f"You are an interviewer and given this document and i want you to provide me a list of relevant questions from it. ",
             },
             {
                 "role": "user",
-                "content": f"Below is the content of the {document_name}: {text}",
+                "content": f"Below is the content of the document: \n{text}.",
             },
         ],
     )
@@ -26,13 +29,12 @@ def get_questions_from_file(text: str, document_name: str):
 
     # Parse the 'choices' field from the API response
     if "choices" in api_response and len(api_response["choices"]) > 0:
-        print(api_response["choices"])
         # Get the 'text' field from the first choice
         questions_text = api_response["choices"][0]["message"]["content"]
-        print(f"GPT-3 Response: {questions_text}")
+        debug(f"GPT-3 Response: {questions_text}")
         # questions_json = json.loads(questions_text)
     else:
-        print("Failed to get a valid response.")
+        debug("Failed to get a valid response.")
 
     return questions_text
 
@@ -44,12 +46,9 @@ def read_pdf(upload_file: str) -> str:
         shutil.copyfileobj(upload_file, temp_file)
         temp_file_path = temp_file.name
     # Read PDF from the temporary file
-    reader = PdfReader(temp_file_path)
-    for page in reader.pages:
-        text += page.extract_text() or ""
-        if reader.pages.index(page) + 1 != len(reader.pages):
-            text += "\n\n"
-
+    doc = fitz.open(temp_file_path)
+    for page in doc:  # iterate the document pages
+        text += page.get_text()  # get plain text encoded as UTF-8
     return text
 
 
@@ -65,7 +64,7 @@ def get_questions_from_resume_and_jd(resume_text: str, jd_text: str):
         messages=[
             {
                 "role": "system",
-                "content": "You are an interviewer and given a job description and my resume and i want you to provide me a list of 8-10 questions which an interviewer will ask the interviewee. Question should be from the perspective to interviewer towards interviewee. Return comma separated questions and without serial numbers",
+                "content": "You are an interviewer and given these documents and i want you to provide me a list of relevant questions from it. ",
             },
             {
                 "role": "user",
@@ -78,13 +77,12 @@ def get_questions_from_resume_and_jd(resume_text: str, jd_text: str):
 
     # Parse the 'choices' field from the API response
     if "choices" in api_response and len(api_response["choices"]) > 0:
-        print(api_response["choices"])
         # Get the 'text' field from the first choice
         questions_text = api_response["choices"][0]["message"]["content"]
-        print(f"GPT-3 Response: {questions_text}")
+        debug(f"GPT-3 Response: {questions_text}")
         # questions_json = json.loads(questions_text)
     else:
-        print("Failed to get a valid response.")
+        debug("Failed to get a valid response.")
 
     return questions_text
 
@@ -134,7 +132,7 @@ def process_resume_and_jd(
             full_jd_text += extracted_text + "\n\n"
         if jd_text:
             full_jd_text += jd_text + "\n\n"
-            
+
         gen_question_text = ""
         if (not full_resume_text) and (not full_jd_text):
             # Direct Questions Provided.
@@ -157,7 +155,7 @@ def process_resume_and_jd(
             if questions and gen_question_text
             else (questions if not gen_question_text else gen_question_text)
         )
-
+    debug(final_questions, "final_questions")
     system_personality_prompt = """You are smart friendly and formal interviewer and i want you to have a human voice call type conversation via chat with me ask me following questions {interview_questions} or something you think would be interesting to ask based on the response of user\n\n"""
     # system_response_prompt="""Please respond only in JSON of format { type:"interviewer",message:"message1"} and only one message\n\n"""
     system_response_prompt = """Ask only one question per response"""
