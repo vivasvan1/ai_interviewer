@@ -1,12 +1,9 @@
+import logging
 import os
-from os.path import join, dirname
+from os.path import dirname, join
+
 from dotenv import load_dotenv
-
-dotenv_path = join(dirname(__file__), ".env")
-load_dotenv(dotenv_path)
-
-# import base64
-from fastapi import FastAPI, UploadFile, Form, File, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from langchain.schema import SystemMessage
 from src.agent.simple import process_user_response
@@ -14,18 +11,159 @@ from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 from src.processing.resume import process_resume_and_jd
 from src.processing.tts import do_text_to_speech
 
-
+logging.basicConfig(level=logging.INFO)
+=======
 import logging
+import os
+from os.path import dirname, join
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from langchain.schema import SystemMessage
+from src.agent.simple import process_user_response
+from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
+from src.processing.resume import process_resume_and_jd
+from src.processing.tts import do_text_to_speech
 
 logging.basicConfig(level=logging.INFO)
 
-from src.utils.audio import convert_audio_to_base64
+=======
+import logging
+import os
+from os.path import dirname, join
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from langchain.schema import SystemMessage
+from src.agent.simple import process_user_response
+from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
+from src.processing.resume import process_resume_and_jd
+from src.processing.tts import do_text_to_speech
+
+logging.basicConfig(level=logging.INFO)
+import os
+from os.path import dirname, join
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+
+=======
+logging.basicConfig(level=logging.INFO)
+
 from src.brokers import email
 from src.routes.interview import analysis
-
+from src.utils.audio import convert_audio_to_base64
 
 # Preload AI models
-# stt_model = whisper.load_model("small")
+
+app = FastAPI()
+
+app.include_router(analysis.router)
+app.include_router(email.router)
+
+
+origins = [
+    "http://localhost:3000",
+    "https://ai-interviewer-two.vercel.app",
+    "https://vaato.vercel.app",
+    "https://vaato.ultimateworld.io",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+=======
+import logging
+import os
+from os.path import dirname, join
+
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from langchain.schema import SystemMessage
+from src.agent.simple import process_user_response
+from src.brokers import email
+from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
+from src.processing.resume import process_resume_and_jd
+from src.processing.tts import do_text_to_speech
+from src.routes.interview import analysis
+from src.utils.audio import convert_audio_to_base64
+
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
+
+logging.basicConfig(level=logging.INFO)
+
+# Preload AI models
+
+app = FastAPI()
+
+app.include_router(analysis.router)
+app.include_router(email.router)
+
+
+origins = [
+    "http://localhost:3000",
+    "https://ai-interviewer-two.vercel.app",
+    "https://vaato.vercel.app",
+    "https://vaato.ultimateworld.io",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+
+=======
+import logging
+
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+
+=======
+    "http://localhost:3000",
+    "https://ai-interviewer-two.vercel.app",
+    "https://vaato.vercel.app",
+    "https://vaato.ultimateworld.io",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+
+=======
+    "http://localhost:3000",
+    "https://ai-interviewer-two.vercel.app",
+    "https://vaato.vercel.app",
+    "https://vaato.ultimateworld.io",
+]
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+
+=======
+import logging
+
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from langchain.schema import SystemMessage
+from src.agent.simple import process_user_response
+from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
+from src.processing.resume import process_resume_and_jd
+from src.processing.tts import do_text_to_speech
+
+logging.basicConfig(level=logging.INFO)
+
+from src.brokers import email
+from src.routes.interview import analysis
+from src.utils.audio import convert_audio_to_base64
+
+# Preload AI models
 
 app = FastAPI(
     title="Vaato Backend",
@@ -84,7 +222,6 @@ async def process_resume(
 
         ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply))
         return {"response": ai_response_base64, "history": history.to_json()}
-
     except Exception as e:
         raise HTTPException(detail=str(e.with_traceback()), status_code=400)
 
