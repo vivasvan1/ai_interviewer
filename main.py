@@ -1,5 +1,6 @@
 import os
 from os.path import join, dirname
+import traceback
 from dotenv import load_dotenv
 
 dotenv_path = join(dirname(__file__), ".env")
@@ -17,12 +18,12 @@ from src.processing.tts import do_text_to_speech
 
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 from src.utils.audio import convert_audio_to_base64
 from src.brokers import email
 from src.routes.interview import analysis
-
+from src.routes.interview import feedback
 
 # Preload AI models
 # stt_model = whisper.load_model("small")
@@ -31,10 +32,6 @@ app = FastAPI(
     title="Vaato Backend",
     version="1.0.1",
 )
-
-app.include_router(analysis.router)
-app.include_router(email.router)
-
 
 origins = [
     "http://localhost:3000",
@@ -51,6 +48,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(analysis.router)
+app.include_router(email.router)
+app.include_router(feedback.router)
 
 from pydantic import BaseModel
 
@@ -77,7 +78,7 @@ async def process_resume(
             jdText,
             questions
         )
-        history = ChatMessageHistoryWithJSON(timestamps=[])
+        history = ChatMessageHistoryWithJSON()
         history.add_message(SystemMessage(content=system_message))
         # history.messages.append(SystemMessage(content=system_message))
         history.add_ai_message(ai_reply)
@@ -108,7 +109,7 @@ async def user_response(
             raise ValueError("No audio data found in the uploaded file")
 
         # convert chat_messages_string to list of AI, Human, System Messages
-        history = ChatMessageHistoryWithJSON(timestamps=[])
+        history = ChatMessageHistoryWithJSON()
         history.from_json(chat_messages)
 
         ai_reply = process_user_response(audio_bytes, history)
@@ -122,5 +123,6 @@ async def user_response(
         return {"response": ai_response_base64, "history": history.to_json()}
 
     except Exception as e:
+        print(traceback.format_exc())
         logging.error(f"Error in user_response: {e}")
         raise HTTPException(detail=str(e), status_code=400)
