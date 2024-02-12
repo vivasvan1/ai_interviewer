@@ -24,7 +24,11 @@ async def send_email(email_message, smtp_username, smtp_password):
         print(f"Error sending email: {str(e)}")
 
 
-@router.post("/send_email")
+@router.post(
+    "/send_email",
+    tags=["Emailing"],
+    description="Send email to customers with this endpoint.",
+)
 async def send_email_background(
     background_tasks: BackgroundTasks,
     recipient: str = Form(...),

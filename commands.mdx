@@ -1,0 +1,12 @@
+Build Docker image
+
+```bash
+cd backend/
+az acr build --resource-group vaatobackend --registry vaato --image vaato:latest .
+```
+
+Restart webapp with latest docker image
+
+```bash
+az webapp restart --name vaato --resource-group vaatobackend
+```

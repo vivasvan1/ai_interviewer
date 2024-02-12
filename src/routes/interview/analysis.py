@@ -1,4 +1,5 @@
 import logging
+import traceback
 from fastapi import APIRouter
 from fastapi import FastAPI, UploadFile, Form, File, HTTPException
 from pydantic import BaseModel
@@ -27,7 +28,7 @@ async def positive_analysis_response(chat_messages: str = Form(...)):
         logging.info("Received request for /interview/analysis/positive")
 
         # convert chat_messages_string to list of AI, Human, System Messages
-        history = ChatMessageHistoryWithJSON(timestamps=[])
+        history = ChatMessageHistoryWithJSON()
         history.from_json(chat_messages)
         history.messages = history.messages[1:]
         history.timestamps = history.timestamps[1:]
@@ -36,6 +37,7 @@ async def positive_analysis_response(chat_messages: str = Form(...)):
         return {"response": str(positive_response)}
 
     except Exception as e:
+        print(traceback.format_exc())
         logging.error(f"Error in user_response: {e}")
         raise HTTPException(detail=str(e), status_code=400)
 
@@ -51,7 +53,7 @@ async def improvement_analysis_response(chat_messages: str = Form(...)):
         logging.info("Received request for /interview/analysis/improvement")
 
         # convert chat_messages_string to list of AI, Human, System Messages
-        history = ChatMessageHistoryWithJSON(timestamps=[])
+        history = ChatMessageHistoryWithJSON()
         history.from_json(chat_messages)
         
         history.messages = history.messages[1:]
@@ -62,5 +64,6 @@ async def improvement_analysis_response(chat_messages: str = Form(...)):
         return {"response": str(improvement_response)}
 
     except Exception as e:
+        print(traceback.format_exc())
         logging.error(f"Error in user_response: {e}")
         raise HTTPException(detail=str(e), status_code=400)
