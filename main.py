@@ -68,7 +68,7 @@ class AIResponse(BaseModel):
     description="Process the uploaded resume (optionally a job description) and produce AI response",
 )
 async def process_resume(
-    resume: UploadFile = None,resumeText: str = Body(default=None), jd: UploadFile = None,jdText: str = Body(default=None), questions: str = Body(default=None)
+    resume: UploadFile = None,resumeText: str = Body(default=None), jd: UploadFile = None,jdText: str = Body(default=None), questions: str = Body(default=None),voice: str = Body(default="alloy"),
 ):
     try:    
         ai_reply, question_text, system_message = process_resume_and_jd(
@@ -83,7 +83,7 @@ async def process_resume(
         # history.messages.append(SystemMessage(content=system_message))
         history.add_ai_message(ai_reply)
 
-        ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply))
+        ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply , voice=voice))
         return {"response": ai_response_base64, "history": history.to_json()}
 
     except Exception as e:
@@ -97,7 +97,7 @@ async def process_resume(
     description="Process user's audio response and compute AI response",
 )
 async def user_response(
-    response_audio: UploadFile = File(...), chat_messages: str = Form(...)
+    response_audio: UploadFile = File(...), chat_messages: str = Form(...),voice: str = Body(default="alloy"),
 ):
     try:
         logging.info("Received request for /interview/next")
@@ -116,10 +116,9 @@ async def user_response(
         if not ai_reply:
             raise ValueError("AI reply is empty or null")
 
-        ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply))
+        ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply,voice=voice))
         if not ai_response_base64:
             raise ValueError("Failed to convert AI reply to base64 encoded audio")
-
         return {"response": ai_response_base64, "history": history.to_json()}
 
     except Exception as e:
