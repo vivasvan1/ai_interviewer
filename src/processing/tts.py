@@ -58,7 +58,7 @@ import requests
 
 
 
-def do_text_to_speech(script):
+def do_text_to_speech(script, voice="alloy"):
     url = "https://api.openai.com/v1/audio/speech"
     headers = {
         "Authorization": "Bearer " + os.getenv("OPENAI_API_KEY"),
@@ -67,8 +67,9 @@ def do_text_to_speech(script):
     data = {
         "model": "tts-1",
         "input": script,
-        "voice": "alloy",
+        "voice": voice,
     }
+
 
     response = requests.post(url, headers=headers, json=data)
 
