@@ -80,10 +80,17 @@ async def process_resume(
         )
         history = ChatMessageHistoryWithJSON()
         history.add_message(SystemMessage(content=system_message))
-        # history.messages.append(SystemMessage(content=system_message))
         history.add_ai_message(ai_reply)
 
-        ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply , voice=voice))
+        # ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply , voice=voice))
+        
+        # # save ai_response_base64 to file
+        # with open(f'./public/first_messages/ai_first_reply_{voice}.wav', 'wb') as f:
+        #     f.write(ai_response_base64.encode('ascii'))
+        
+        with open(f'./public/first_messages/ai_first_reply_{voice}.wav', 'rb') as f:
+            ai_response_base64 = f.read().decode('ascii')
+        
         return {"response": ai_response_base64, "history": history.to_json()}
 
     except Exception as e:

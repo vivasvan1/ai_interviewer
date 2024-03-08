@@ -166,6 +166,7 @@ def process_resume_and_jd(
 
     # out = chat(chat_messages)
     # ai_reply = json.loads(out.content)["message"]
-    ai_reply: str = "Hi there this is Sam. Your AI Interviewer for today. Hope you are doing well. Shall we get started?"
+    ai_reply: str= "" # just kept for historical purpose
+    # ai_reply: str = f"Hi there this is {voice}. Your AI Interviewer for today. Hope you are doing well. Shall we get started?"
     # chat_messages.append(AIMessage(content=ai_reply))
     return ai_reply, final_questions, system_message
