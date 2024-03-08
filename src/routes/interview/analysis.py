@@ -58,12 +58,15 @@ async def improvement_analysis_response(chat_messages: str = Form(...)):
         
         history.messages = history.messages[1:]
         history.timestamps = history.timestamps[1:]
-
+        
         improvement_response = generate_improvement_analysis(history)
-
+        
         return {"response": str(improvement_response)}
+    
 
     except Exception as e:
         print(traceback.format_exc())
         logging.error(f"Error in user_response: {e}")
         raise HTTPException(detail=str(e), status_code=400)
+    
+    
