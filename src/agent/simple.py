@@ -1,24 +1,25 @@
 # import base64
 import os
 
-# import whisper
-
-from langchain.schema import AIMessage, HumanMessage, SystemMessage, BaseMessage
+import requests
 
 # from IPython.display import Audio
 from langchain.chat_models import ChatOpenAI
-import requests
+from langchain.schema import BaseMessage, SystemMessage
 
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 
+# import whisper
+
+
 chat = ChatOpenAI(temperature=0.3, openai_api_key=os.environ.get("OPENAI_API_KEY"))
 
-system_personality_prompt = """You are smart friendly and formal interviewer and i want you to have a human voice call type conversation via chat with me start out by introducing yourself as AI Interviewer called Vaato and then ask me following questions {interview_questions} or something you think would be interesting to ask based on the response of user. Dont divert from asking questions\n\n"""
+system_personality_prompt_case = """You are smart friendly and formal interviewer and i want you to have a human voice call type conversation via chat with me start out by introducing yourself as AI Interviewer called Vaato and then ask me following questions {interview_questions} or something you think would be interesting to ask based on the response of user. Dont divert from asking questions\n\n"""
 # system_response_prompt="""Please respond only in JSON of format { type:"interviewer",message:"message1"} and only one message\n\n"""
 system_response_prompt = """Ask only one question per response"""
 
 chat_messages: list[BaseMessage] = [
-    SystemMessage(content=system_personality_prompt + system_response_prompt)
+    SystemMessage(content=system_personality_prompt_case + system_response_prompt)
 ]
 
 
