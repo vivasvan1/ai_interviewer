@@ -1,12 +1,14 @@
+import os
 import openai
 import json
 from typing import List
 
 
+
 def chatgpt_prompt(model, prompts):
     """Function to interact with ChatGPT for generating responses."""
     response = openai.ChatCompletion.create(
-        model=model, messages=prompts
+        model=model, messages=prompts, api_key=os.environ.get("OPENAI_API_KEY", "")
     )
     return (
         response.choices[0].message["content"]
@@ -17,7 +19,7 @@ def chatgpt_prompt(model, prompts):
 
 def get_embeddings(texts):
     """Fetch embeddings for a list of texts."""
-    response = openai.Embedding.create(input=texts, model="text-embedding-ada-002")
+    response = openai.Embedding.create(input=texts, model="text-embedding-ada-002", api_key=os.environ.get("OPENAI_API_KEY", ""))
     return response["data"]
 
 
