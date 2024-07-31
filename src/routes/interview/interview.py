@@ -65,7 +65,7 @@ async def process_resume(
     questions: str = Body(default=None),
     questions_list: List[str] = Body(default=[]),
     is_dynamic: bool = Body(default=True),
-    voice: str = Body(default="alloy"),
+    voice: str = Body(default="echo"),
     language: str = Body(default="en")  # Added language parameter
 ):
     try:
