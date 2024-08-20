@@ -15,7 +15,7 @@ def question_arr_formatter(question_text):
     text = question_text
     
     #remove unwanted header from the question_text
-    index = question_text.find("1.")
+    index = question_text.find("1. ")
     if (index != -1):
         text = text[index:]
         
