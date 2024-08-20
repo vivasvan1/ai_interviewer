@@ -9,6 +9,7 @@ from src.processing.tts import do_text_to_speech
 from fastapi import APIRouter, Body, FastAPI, UploadFile, Form, File, HTTPException
 from pydantic import BaseModel
 from typing import List
+from src.utils.helper import question_arr_formatter
 
 
 class AIResponse(BaseModel):
@@ -46,7 +47,7 @@ async def get_questions(
             [],
             True,
         )
-        return {"questions": question_text.split("\n")}
+        return {"questions": question_arr_formatter(question_text) }
     except Exception as e:
         raise HTTPException(detail=str(e.with_traceback()), status_code=400)
 
