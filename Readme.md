@@ -39,3 +39,10 @@ The project is structured as follows:
 - `tests/`: This directory contains the tests for the application.
 
 Please refer to the individual files and directories for more detailed information.
+
+
+## Azure redeploy commands
+```bash
+az acr build --resource-group vaatobackend --registry vaato --image vaato:latest .
+az webapp update --resource-group vaatobackend --name vaato
+```
