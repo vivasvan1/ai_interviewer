@@ -17,7 +17,7 @@ docker build -t ai_interviewer .
 To run the Docker image, use the following command:
 
 ```bash
-docker run -p 3100:3100 ai_interviewer
+docker run -p 8000:8000 ai_interviewer
 ```
 
 Once the application is running, you can access it by navigating to `localhost:8000` in your web browser.

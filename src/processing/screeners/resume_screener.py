@@ -58,18 +58,11 @@ def resume_screener(resumesText:List[str], jdText: str) -> str:
             [
                 {
                     "role": "system",
-                    "content": (
-                        "You are an assistant tasked with summarizing resumes. "
-                        "Extract the candidate's name, email ID, and phone number (if available). "
-                        "Return JSON of format "
-                        '{"summary": "<summary>", "candidate_name": "<candidate_name>", "email": "<email>", "phone_number": "<phone_number>"}'
-                    ),
+                    "content": "You are an assistant tasked with summarizing resumes. return JSON of format \{\"summary\": \"<summary>\", \"candidate_name\": \"<candidate_name>\"\}", 
                 },
                 {"role": "user", "content": resume},
             ],
         )
-
-
         embedding = resume_embeddings[index]
         if embedding:
             resume_embedding = embedding["embedding"]
