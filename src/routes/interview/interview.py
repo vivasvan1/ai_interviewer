@@ -67,7 +67,6 @@ async def process_resume(
     questions_list: List[str] = Body(default=[]),
     is_dynamic: bool = Body(default=True),
     voice: str = Body(default="alloy"),
-      language: str = Body(default="en")  # Added language parameter
 ):
     try:
         ai_reply, question_text, system_message = process_resume_and_jd(
@@ -89,7 +88,7 @@ async def process_resume(
         # with open(f'./public/first_messages/ai_first_reply_{voice}.wav', 'wb') as f:
         #     f.write(ai_response_base64.encode('ascii'))
 
-        with open(f"./public/first_messages/ai_first_reply_{voice}_{language}.wav", "rb") as f:
+        with open(f"./public/first_messages/ai_first_reply_{voice}.wav", "rb") as f:
             ai_response_base64 = f.read().decode("ascii")
 
         return {"response": ai_response_base64, "history": history.to_json()}
