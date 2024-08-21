@@ -108,7 +108,6 @@ async def user_response(
     response_audio: UploadFile = File(...),
     chat_messages: str = Form(...),
     voice: str = Body(default="alloy"),
-    language: str = Body(default="en")  # Added language parameter
 ):
     try:
         logging.info("Received request for /interview/next")
@@ -128,7 +127,7 @@ async def user_response(
             raise ValueError("AI reply is empty or null")
 
         ai_response_base64 = convert_audio_to_base64(
-            do_text_to_speech(ai_reply, voice=voice,language=language)
+            do_text_to_speech(ai_reply, voice=voice)
         )
         if not ai_response_base64:
             raise ValueError("Failed to convert AI reply to base64 encoded audio")
