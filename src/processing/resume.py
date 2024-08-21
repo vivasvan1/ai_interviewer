@@ -243,7 +243,6 @@ def calculate_questions(
         if len(questions_list) > 0:
             strategy = QuestionListStrategy()
 
-    print("strategy", strategy)
 
     gen_question_text = strategy.generate(
         full_resume_text, full_jd_text, questions_list
@@ -253,9 +252,6 @@ def calculate_questions(
     final_questions = (
         (gen_question_text + "\n" + questions) if questions else gen_question_text
     )
-
-    print("final_questions", final_questions)
-
     return final_questions
 
 
