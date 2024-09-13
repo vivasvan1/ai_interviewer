@@ -45,4 +45,6 @@ Please refer to the individual files and directories for more detailed informati
 ```bash
 az acr build --resource-group vaatobackend --registry vaato --image vaato:latest .
 az webapp update --resource-group vaatobackend --name vaato
+az webapp restart --name vaato --resource-group vaatobackend
+
 ```
