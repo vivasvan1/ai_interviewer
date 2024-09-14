@@ -72,6 +72,7 @@ def do_text_to_speech(script, voice="alloy"):
 
 
     response = requests.post(url, headers=headers, json=data)
+    
 
     if response.status_code == 200:
         return response.content
@@ -141,10 +142,10 @@ def do_text_to_speech(script, voice="alloy"):
     # return audio_obj
 
 
-import collections
-import contextlib
-import sys
-import wave
+# import collections
+# import contextlib
+# import sys
+# import wave
 # import webrtcvad
 # from pydub import AudioSegment
 

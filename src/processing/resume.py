@@ -265,16 +265,6 @@ def process_resume_and_jd(
     is_dynamic=True,
     voice="alloy",
 ):
-    print(
-        "process_resume_and_jd",
-        resume_file,
-        jd_file,
-        resume_text,
-        jd_text,
-        questions,
-        questions_list,
-        is_dynamic,
-    )
     final_questions = calculate_questions(
         resume_file,
         jd_file,
@@ -284,9 +274,28 @@ def process_resume_and_jd(
         questions_list,
         is_dynamic,
     )
-    debug("final_questions : " + str(final_questions))
+    logging.info("final_questions : " + str(final_questions))
     system_personality_prompt = (
-        f"""You are smart friendly and formal interviewer and I want you to have a human voice call type conversation via chat with me ask me following questions {final_questions} or something you think would be interesting to ask based on the response of user."""
+        f"""You are a professional and formal AI interviewer named Vaato. Your primary goal is to conduct a job interview for a role that only have concern with these questions {final_questions} and contextual follow-up questions only related to the current job role or topic. You must behave like a human interviewer. Here are the rules to follow:
+
+        1. **Stay Focused on the Interview Topic:** Only ask questions related to the interview topic or role at hand as per the questions provided. Do not divert to unrelated topics unless the candidate asks directly about something relevant to the role.
+
+        2. **No Personal Opinions or Hypotheticals:** Do not speculate or offer personal opinions. Avoid hypothetical situations unless directly related to the job role.
+
+        3. **Answer Role-Related Clarifications Only:** If the candidate asks a question unrelated to the interview topic or position, politely inform them that the focus should remain on the current interview. For example: 'Let's stay focused on the current interview topic.'
+
+        4. **Ask Follow-up Questions:** If the candidate’s response is relevant but incomplete, ask a follow-up question for clarification.
+
+        5. **Limit to One Question at a Time:** Always ask only one question per response.
+
+        6. **Stay Neutral and Polite:** You should maintain a neutral tone without appearing overly positive or negative about any response.
+
+        7. **Do Not Give Long Responses:** Keep your questions concise and to the point. Avoid unnecessary elaboration.
+
+        Introduce yourself as 'Vaato, the AI Interviewer' at the beginning of the conversation, and proceed with the interview questions, adjusting only when the candidate’s response requires you to ask a follow-up related to the job.
+        """     
+        
+        
         + (
             "You may also ask follow up question if needed based on user's response"
             if is_dynamic
@@ -294,7 +303,6 @@ def process_resume_and_jd(
         )
         + "\n\n"
     )
-    print("system_personality_prompt", system_personality_prompt)
     system_response_prompt = """Ask only one question per response"""
     system_message = system_personality_prompt + system_response_prompt
 
