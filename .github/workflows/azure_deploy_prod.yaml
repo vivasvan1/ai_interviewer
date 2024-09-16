@@ -1,0 +1,42 @@
+name: Docker Build and Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push to the main branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Azure CLI
+      uses: azure/cli@v1
+
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Build and Push Docker Image to ACR
+      run: |
+        az acr build --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+        --registry ${{ secrets.AZURE_REGISTRY }}
+        --image vaatobackend:latest .
+
+    - name: Update Azure Web App with Latest Image
+      run: |
+        az webapp config container set --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+        --name ${{ secrets.AZURE_WEBAPP_NAME }}
+        --docker-custom-image-name ${{ secrets.AZURE_REGISTRY }}.azurecr.io/vaatobackend:latest
+        --docker-registry-server-url https://{{ secrets.AZURE_REGISTRY }}.azurecr.io
+        --docker-registry-server-user ${{ secrets.ACR_USERNAME }}
+        --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
+
+    - name: Restart Azure Web App
+      run: |
+        az webapp restart --name ${{ secrets.AZURE_WEBAPP_NAME }}
+        --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
