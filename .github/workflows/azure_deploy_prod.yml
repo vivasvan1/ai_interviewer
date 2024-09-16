@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://vaato.azurecr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_10f7508624d0495faaf2b35ea89e614e }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_0354c20722af4c648a8412fc551c41cc }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: vaato.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_10f7508624d0495faaf2b35ea89e614e }}/vaatobackend:${{ github.sha }}
+        tags: vaato.azurecr.io/vaatobackend:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'vaato'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_56f69ad9588e49afb9bdc1a2ea09d172 }}
-        images: 'vaato.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_10f7508624d0495faaf2b35ea89e614e }}/vaatobackend:${{ github.sha }}'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        images: 'vaato.azurecr.io/vaatobackend:${{ github.sha }}'
