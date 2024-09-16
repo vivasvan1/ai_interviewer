@@ -1,8 +1,11 @@
 import logging
+import os
 import traceback
 from langchain.schema import SystemMessage
+from src.ai_names import VoiceType
+from src.processing.ai_prompt import interviewer_behavior_prompt
 from src.utils.audio import convert_audio_to_base64
-from src.agent.simple import process_user_response
+from src.agent.simple import conversation, process_user_response
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 from src.processing.resume import calculate_questions, process_resume_and_jd
 from src.processing.tts import do_text_to_speech
@@ -58,7 +61,7 @@ async def get_questions(
     tags=["Interview"],
     description="Process the uploaded resume (optionally a job description) and produce AI response",
 )
-async def process_resume(
+async def initiate_interview(
     resume: UploadFile = None,
     resumeText: str = Body(default=None),
     jd: UploadFile = None,
@@ -66,30 +69,30 @@ async def process_resume(
     questions: str = Body(default=None),
     questions_list: List[str] = Body(default=[]),
     is_dynamic: bool = Body(default=True),
-    voice: str = Body(default="alloy"),
+    voice: VoiceType = Body(default=VoiceType.ALLOY),
 ):
     try:
-        ai_reply, question_text, system_message = process_resume_and_jd(
+        system_message,ai_reply = interviewer_behavior_prompt(
             resume.file if resume else None,
             jd.file if jd else None,
             resumeText,
             jdText,
             questions,
-            questions_list[0].split(",") if len(questions_list) else questions_list,
+            questions_list,
             is_dynamic,
+            voice
         )
         history = ChatMessageHistoryWithJSON()
         history.add_message(SystemMessage(content=system_message))
         history.add_ai_message(ai_reply)
 
-        # ai_response_base64 = convert_audio_to_base64(do_text_to_speech(ai_reply , voice=voice))
 
-        # # save ai_response_base64 to file
-        # with open(f'./public/first_messages/ai_first_reply_{voice}.wav', 'wb') as f:
-        #     f.write(ai_response_base64.encode('ascii'))
-
-        with open(f"./public/first_messages/ai_first_reply_{voice}.wav", "rb") as f:
-            ai_response_base64 = f.read().decode("ascii")
+        # with open(f"./public/first_messages/ai_first_reply_{voice}.wav", "rb") as f:
+        #     ai_response_base64 = f.read().decode("ascii")
+        
+        ai_response_base64 = convert_audio_to_base64(
+            do_text_to_speech(ai_reply, voice.value)
+        )
 
         return {"response": ai_response_base64, "history": history.to_json()}
 
@@ -106,11 +109,9 @@ async def process_resume(
 async def user_response(
     response_audio: UploadFile = File(...),
     chat_messages: str = Form(...),
-    voice: str = Body(default="alloy"),
+    voice: VoiceType = Body(default=VoiceType.ALLOY),
 ):
     try:
-        logging.info("Received request for /interview/next")
-
         audio_bytes = await response_audio.read()
 
         # Check if audio_bytes is not empty
@@ -126,7 +127,7 @@ async def user_response(
             raise ValueError("AI reply is empty or null")
 
         ai_response_base64 = convert_audio_to_base64(
-            do_text_to_speech(ai_reply, voice=voice)
+            do_text_to_speech(ai_reply, voice.value)
         )
         if not ai_response_base64:
             raise ValueError("Failed to convert AI reply to base64 encoded audio")

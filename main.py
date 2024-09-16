@@ -25,7 +25,9 @@ from src.routes.resume_screener import screener
 
 app = FastAPI(
     title="Vaato Backend",
-    version="1.0.1",
+    version="1.0.2",
+    description="{commit:'0730a071f5a27cf73ef4e9eae6f3abe3c858a292'}"
+    
 )
 
 origins = [
