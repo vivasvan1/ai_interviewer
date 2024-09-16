@@ -6,37 +6,23 @@ on:
       - main  # Trigger the workflow on push to the main branch
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@main
 
-    - name: Set up Azure CLI
-      uses: azure/setup-azure-cli@v1
-
-    - name: Login to Azure
-      uses: azure/login@v1
+    - uses: azure/docker-login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+          login-server: vaato.azurecr.io
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
-    - name: Build and Push Docker Image to ACR
-      run: |
-        az acr build --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
-        --registry ${{ secrets.AZURE_REGISTRY }}
-        --image vaatobackend:latest .
+    - run: |
+          docker build . -t vaato.azurecr.io/vaatobackend:latest
+          docker push vaato.azurecr.io/vaatobackend:latest
 
-    - name: Update Azure Web App with Latest Image
-      run: |
-        az webapp config container set --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
-        --name ${{ secrets.AZURE_WEBAPP_NAME }}
-        --docker-custom-image-name ${{ secrets.AZURE_REGISTRY }}.azurecr.io/vaatobackend:latest
-        --docker-registry-server-url https://{{ secrets.AZURE_REGISTRY }}.azurecr.io
-        --docker-registry-server-user ${{ secrets.ACR_USERNAME }}
-        --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
-
-    - name: Restart Azure Web App
-      run: |
-        az webapp restart --name ${{ secrets.AZURE_WEBAPP_NAME }}
-        --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }}
+    - uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'vaato'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        images: 'vaato.azurecr.io/vaatobackend:latest'
