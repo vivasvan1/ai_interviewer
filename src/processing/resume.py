@@ -3,7 +3,6 @@ import logging
 import shutil
 from typing import List
 import openai
-from pypdf import PdfReader
 import tempfile
 import fitz
 
