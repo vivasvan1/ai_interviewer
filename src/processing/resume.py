@@ -190,6 +190,8 @@ class QuestionListStrategy(QuestionGenerationStrategy):
         # Logic for generating questions based on both resume and job description texts
         gen_question_text = "\n".join(questions_list)
         return gen_question_text
+    
+    
 
 
 def combine_file_content_and_text(file_path, text):
