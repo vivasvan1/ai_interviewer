@@ -30,6 +30,9 @@ pydantic_core==2.18.4
 python-dotenv==1.0.0
 python-http-client==3.3.7
 python-multipart==0.0.6
+PyMuPDF==1.23.8
+PyMuPDFb==1.23.7
+pypdf==3.17.3
 PyYAML==6.0.1
 requests==2.31.0
 sendgrid==6.11.0
