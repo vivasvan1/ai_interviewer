@@ -69,7 +69,7 @@ async def initiate_interview(
     questions: str = Body(default=None),
     questions_list: List[str] = Body(default=[]),
     is_dynamic: bool = Body(default=True),
-    voice: VoiceType = Body(default=VoiceType.ALLOY),
+    voice: VoiceType = Body(default=VoiceType.alloy),
 ):
     try:
         system_message,ai_reply = interviewer_behavior_prompt(
@@ -109,7 +109,7 @@ async def initiate_interview(
 async def user_response(
     response_audio: UploadFile = File(...),
     chat_messages: str = Form(...),
-    voice: VoiceType = Body(default=VoiceType.ALLOY),
+    voice: VoiceType = Body(default=VoiceType.alloy),
 ):
     try:
         audio_bytes = await response_audio.read()

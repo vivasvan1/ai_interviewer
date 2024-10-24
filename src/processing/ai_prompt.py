@@ -13,7 +13,7 @@ def interviewer_behavior_prompt(
     questions=None,
     questions_list=[],
     is_dynamic=True,
-    voice:VoiceType = VoiceType.ALLOY,
+    voice:VoiceType = VoiceType.alloy,
 ):
     # Combine jd_text and jd_file if any one or both available
     jd_information = combine_file_content_and_text(jd_file, jd_text)
