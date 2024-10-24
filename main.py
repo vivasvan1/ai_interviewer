@@ -12,16 +12,13 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 logging.basicConfig(level=logging.INFO)
-
+import socketio
 from src.brokers import email
-from src.routes.interview import analysis
+from src.routes.interview import analysis, conversation
 from src.routes.interview import feedback
 from src.routes.interview import interview
 from src.routes.hr_campaign import gen_metric
 from src.routes.resume_screener import screener
-
-# Preload AI models
-# stt_model = whisper.load_model("small")
 
 app = FastAPI(
     title="Vaato Backend",
@@ -52,4 +49,5 @@ app.include_router(feedback.router)
 app.include_router(interview.router)
 app.include_router(gen_metric.router)
 app.include_router(screener.router)
+app.include_router(conversation.router)
 

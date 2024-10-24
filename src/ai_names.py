@@ -1,23 +1,24 @@
 from enum import Enum
 
 class VoiceType(Enum):
-    ALLOY = "alloy"
-    ECHO = "echo"
-    FABLE = "fable"
-    ONYX = "onyx"
-    NOVA = "nova"
-    SHIMMER = "shimmer"
+    alloy = "alloy"
+    echo = "echo"
+    fable = "fable"
+    onyx = "onyx"
+    nova = "nova"
+    shimmer = "shimmer"
 
 class AiNameAndVoice:
     def __init__(self):
         self.voice_to_name = {
-            VoiceType.ALLOY:"Sam",
-            VoiceType.ECHO: "Joy",
-            VoiceType.FABLE: "Mo",
-            VoiceType.ONYX: "Peter",
-            VoiceType.NOVA: "Ria",
-            VoiceType.SHIMMER: "Niya"
+            VoiceType.alloy:"Sam",
+            VoiceType.echo: "Joy",
+            VoiceType.fable: "Mo",
+            VoiceType.onyx: "Peter",
+            VoiceType.nova: "Ria",
+            VoiceType.shimmer: "Niya"
         }
 
     def getName(self, voice: VoiceType) -> str:
-        return self.voice_to_name.get(voice)  
+        voice_type = VoiceType(voice)
+        return self.voice_to_name.get(voice_type)  
