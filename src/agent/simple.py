@@ -68,6 +68,14 @@ def conversation(message: str, chat_messages: list[BaseMessage]) -> str:
     # chat_messages.append(AIMessage(content=out.content))
     return out.content
 
+def continueConversation(history: ChatMessageHistoryWithJSON):
+    try:
+        ai_reply: str = conversation("", history.messages)
+        
+        return ai_reply
+    except Exception as e:
+        raise e
+ 
 
 def process_user_response(audio_data, history: ChatMessageHistoryWithJSON):
     # audio_data = base64.b64decode(user_response_file)

@@ -33,4 +33,4 @@ EXPOSE 3100
 
 
 # Define the command to run the application
-CMD ["gunicorn", "main:app"]
+CMD ["gunicorn","-k", "uvicorn.workers.UvicornWorker", "main:app"]

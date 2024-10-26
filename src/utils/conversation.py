@@ -1,6 +1,6 @@
 
 
-from src.agent.simple import process_user_response
+from src.agent.simple import continueConversation, process_user_response
 from src.ai_names import AiNameAndVoice, VoiceType
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
 from src.processing.tts import do_text_to_speech
@@ -16,11 +16,17 @@ class Conversation:
     def inititateConversation(self,voice:VoiceType,history: str):
         self.ai_voice = voice
         self.history.from_json(history)
+        
+        ai_reply = continueConversation(self.history)
+        ai_response_base64 = convert_audio_to_base64(
+            do_text_to_speech(ai_reply, self.ai_voice)
+        )
+        if not ai_response_base64:
+            raise ValueError("Failed to convert AI reply to base64 encoded audio")
+        return {"response": ai_response_base64,"response_test": ai_reply, "history": self.history.to_json()}
     
     def getWelcomeMessage(self):
-        print("voice: ",self.ai_voice)
         voice_name = AiNameAndVoice().getName(self.ai_voice)
-        print("voicename: ",voice_name)
         ai_reply: str = (
             f"Hi there, this is {voice_name} . Your AI interviewer for today. Hope you are doing well. Shall we get started?"
         )

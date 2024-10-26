@@ -72,7 +72,7 @@ async def initiate_interview(
     voice: VoiceType = Body(default=VoiceType.alloy),
 ):
     try:
-        system_message,ai_reply = interviewer_behavior_prompt(
+        system_message = interviewer_behavior_prompt(
             resume.file if resume else None,
             jd.file if jd else None,
             resumeText,
@@ -84,17 +84,17 @@ async def initiate_interview(
         )
         history = ChatMessageHistoryWithJSON()
         history.add_message(SystemMessage(content=system_message))
-        history.add_ai_message(ai_reply)
+        # history.add_ai_message(ai_reply)
 
 
         # with open(f"./public/first_messages/ai_first_reply_{voice}.wav", "rb") as f:
         #     ai_response_base64 = f.read().decode("ascii")
         
-        ai_response_base64 = convert_audio_to_base64(
-            do_text_to_speech(ai_reply, voice.value)
-        )
+        # ai_response_base64 = convert_audio_to_base64(
+        #     do_text_to_speech(ai_reply, voice.value)
+        # )
 
-        return {"response": ai_response_base64, "history": history.to_json()}
+        return {"response": "", "history": history.to_json()}
 
     except Exception as e:
         raise HTTPException(detail=str(e.with_traceback()), status_code=400)

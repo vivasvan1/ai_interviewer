@@ -27,9 +27,8 @@ async def conversation_endpoint(websocket: WebSocket):
                 print("Recieved initiate call")
                 voice = msg.get('voice')
                 history = msg.get('history')
-                conversation.inititateConversation(voice,history)
-                welcome_message = conversation.getWelcomeMessage()
-                await websocket.send_json(welcome_message)
+                ai_reply =conversation.inititateConversation(voice,history)
+                await websocket.send_json(ai_reply)
             elif type == "reply":
                 print("recieved reply")
                 audio_binary = await websocket.receive_bytes()

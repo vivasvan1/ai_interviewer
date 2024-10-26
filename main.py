@@ -12,7 +12,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 logging.basicConfig(level=logging.INFO)
-import socketio
 from src.brokers import email
 from src.routes.interview import analysis, conversation
 from src.routes.interview import feedback
