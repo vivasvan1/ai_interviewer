@@ -1,3 +1,4 @@
+import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 
@@ -7,6 +8,7 @@ load_dotenv(dotenv_path)
 # import base64
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 
 
 import logging
@@ -30,13 +32,13 @@ origins = [
     "http://localhost:3000",
     "https://ai-interviewer-two.vercel.app",
     "https://vaato.vercel.app",
-    "https://vaato.ultimateworld.io",
+    "https://vaato.ultimateworld.io"
 ]
-
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex = r"https://vaato(-.*)?\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

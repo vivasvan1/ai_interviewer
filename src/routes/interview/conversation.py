@@ -24,7 +24,6 @@ async def conversation_endpoint(websocket: WebSocket):
             msg = await websocket.receive_json()
             type = msg.get('type')
             if type == 'initial':
-                print("Recieved initiate call")
                 voice = msg.get('voice')
                 history = msg.get('history')
                 ai_reply =conversation.inititateConversation(voice,history)
