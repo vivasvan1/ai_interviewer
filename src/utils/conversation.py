@@ -1,5 +1,4 @@
 
-
 from src.agent.simple import continueConversation, process_user_response
 from src.ai_names import AiNameAndVoice, VoiceType
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
@@ -16,15 +15,19 @@ class Conversation:
     def inititateConversation(self,voice:VoiceType,history: str):
         self.ai_voice = voice
         self.history.from_json(history)
+        msg = self.history.messages
         
-        ai_reply = continueConversation(self.history)
-        ai_response_base64 = convert_audio_to_base64(
-            do_text_to_speech(ai_reply, self.ai_voice)
-        )
-        if not ai_response_base64:
-            raise ValueError("Failed to convert AI reply to base64 encoded audio")
-        return {"response": ai_response_base64,"response_test": ai_reply, "history": self.history.to_json()}
-    
+        if any(obj.type == "human" for obj in msg):
+            ai_reply = continueConversation(self.history)
+            ai_response_base64 = convert_audio_to_base64(
+                do_text_to_speech(ai_reply, self.ai_voice)
+            )
+            if not ai_response_base64:
+                raise ValueError("Failed to convert AI reply to base64 encoded audio")
+            return {"response": ai_response_base64,"response_test": ai_reply, "history": self.history.to_json()}
+        else:
+            return self.getWelcomeMessage()
+        
     def getWelcomeMessage(self):
         voice_name = AiNameAndVoice().getName(self.ai_voice)
         ai_reply: str = (
@@ -40,6 +43,7 @@ class Conversation:
         return {"response": ai_response_base64, "response_test": ai_reply ,"history": self.history.to_json()}
     
     def process_reply(self,audio_data):
+        
 
         ai_reply = process_user_response(audio_data, self.history)
         if not ai_reply:
@@ -48,6 +52,11 @@ class Conversation:
         ai_response_base64 = convert_audio_to_base64(
             do_text_to_speech(ai_reply, self.ai_voice)
         )
+        
+        last = self.history.messages
+        # last = json_dict["messages"][-1]
+        print(last[-1].type)
+
         if not ai_response_base64:
             raise ValueError("Failed to convert AI reply to base64 encoded audio")
         return {"response": ai_response_base64,"response_test": ai_reply, "history": self.history.to_json()}

@@ -29,7 +29,7 @@ def get_questions_from_file(text: str, document_name: str):
     # Get the questions from GPT-3
     api_response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=[
+        messages=[ 
             {
                 "role": "system",
                 "content": f"You are an interviewer and given this document and i want you to provide me a list of questions. ",

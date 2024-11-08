@@ -37,7 +37,7 @@ Example Response:
 {{"Conflict Resolution": 9}}
 ]
 }}"""
-    print(prompt)
+    # print(prompt)
 
     api_response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -53,7 +53,7 @@ Example Response:
         ],
     )
 
-    print(api_response, "api_response")
+    # print(api_response, "api_response")
 
     # Parse the 'choices' field from the API response
     if "choices" in api_response and len(api_response["choices"]) > 0:
