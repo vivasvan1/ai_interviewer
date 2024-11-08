@@ -6,6 +6,7 @@ WORKDIR /app
 # Install Git
 # RUN apt-get update && apt-get install -y git
 
+
 # Install build tools and curl
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -15,6 +16,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Rust and Cargo
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
+
+RUN apt-get update
+RUN apt-get -y install libglib2.0-0
+RUN apt-get -y install libsm6 libxrender-dev libxext6
 
 # Copy requirements.txt to the container
 COPY requirements.txt .

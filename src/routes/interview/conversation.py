@@ -1,12 +1,6 @@
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-
-from src.agent.simple import process_user_response
-from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
-from src.processing.tts import do_text_to_speech
-from src.utils.audio import convert_audio_to_base64
 from src.utils.conversation import Conversation
-from src.utils.websocketManager import WebSocketManager
 
 # Create a new APIRouter instance for the conversation
 router = APIRouter()

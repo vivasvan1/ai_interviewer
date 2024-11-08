@@ -146,6 +146,6 @@ class GazeDetection:
                 finalGaze = 'out'
         elif headPose == 'out':
             finalGaze = 'out'
-                
+            
         return finalGaze
     

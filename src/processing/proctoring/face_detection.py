@@ -8,7 +8,6 @@ class FaceDetection:
         self.face_detection = mp_faceDetector.FaceDetection(min_detection_confidence=0.5)
         
     def faceCountDetection(self,image):
-        
         image = cv.cvtColor(image,cv.COLOR_BGR2RGB)
         results = self.face_detection.process(image)
         

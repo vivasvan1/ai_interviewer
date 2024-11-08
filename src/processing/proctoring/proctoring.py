@@ -1,61 +1,36 @@
-import os
 import cv2 as cv
-from pydantic import BaseModel
+import numpy as np
+import requests
 
 from src.processing.proctoring.face_detection import FaceDetection
 from src.processing.proctoring.gaze_detection import GazeDetection
 
-    
-def load_images_from_folder(folder_path):
-    images = []
-    valid_extensions = {".jpg", ".jpeg", ".png", ".bmp"}  # Supported image extensions
-    for filename in os.listdir(folder_path):
-        # Check file extension to confirm it's an image
-        ext = os.path.splitext(filename)[1].lower()
-        if ext not in valid_extensions:
-            print(f"Skipping non-image file: {filename}")
-            continue
-
-        # Construct the full file path
-        file_path = os.path.join(folder_path, filename)
-
-        # Read the image and add to list if it's loaded successfully
-        image = cv.imread(file_path)
-        if image is not None:
-            images.append([filename,image])
-        else:
-            print(f"Unable to load image: {file_path}")
-    return images
-
-def processFrame():
-
-    # Use dynamic path based on the script's location
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    folder_path = os.path.join(script_dir, "test_images")
-
-    # Check if the directory exists
-    if not os.path.exists(folder_path):
-        print(f"Error: The folder '{folder_path}' does not exist.")
-        return []
-    
-    frames_data = load_images_from_folder(folder_path)
+def processFrame(frame_urls: list):
     
     gaze_detection = GazeDetection()
     face_detection = FaceDetection()
     
     continuous_gaze_out_count = 3
     gaze_out_data = []
-    suspicious_behaviors = []  # To store timestamps of suspicious behaviors
-    for meta in frames_data:
-        filename,image = meta
+    suspicious_behaviors = [] 
+    for image_url in frame_urls:
+        image = requests.get(image_url)
+        
+        if image.status_code != 200 or image.content == b'':
+            print("content issue")
+            continue
+        
+        image_np = np.frombuffer(image.content, np.uint8)
+        image = cv.imdecode(image_np, cv.IMREAD_COLOR)
         try:
+            
             # Process the image for head pose and gaze detection
             finalGaze = gaze_detection.processGaze(image)
             if finalGaze == 'out':
                 continuous_gaze_out_count -= 1
-                gaze_out_data.append(filename)
+                gaze_out_data.append(image_url)
                 if (continuous_gaze_out_count == 0):
-                    suspicious_behaviors.append({"flag": "gaze_out","frames": gaze_out_data})
+                    suspicious_behaviors.append({"tag": "gaze_out","frames": gaze_out_data})
                     
                     #reset count an image list
                     continuous_gaze_out_count = 3
@@ -69,9 +44,10 @@ def processFrame():
         try:
             faceCount = face_detection.faceCountDetection(image)
             if faceCount == 0:
-                suspicious_behaviors.append({"flag": "absence","frames": [filename]})
+                suspicious_behaviors.append({"tag": "absence","frames": [image_url]})
             elif faceCount >1:
-                suspicious_behaviors.append({"flag": "multiple_face","frames":[filename]})
+                suspicious_behaviors.append({"tag": "multiple_face","frames":[image_url]})
         except Exception as e:
             print(f"Error in face detection: {e}")
+
     return suspicious_behaviors
