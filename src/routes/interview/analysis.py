@@ -89,14 +89,10 @@ async def overall_analysis_response(data: dict = Body(...)):
         historyData = supabase.from_("interviews").select("history").eq("uuid",uuid).single().execute()
         chat_messages = historyData.data['history']
         
-
         # convert chat_messages_string to list of AI, Human, System Messages
         history = ChatMessageHistoryWithJSON()
         history.from_json(chat_messages)
-        
-        history.messages = history.messages[1:]
-        history.timestamps = history.timestamps[1:]
-        
+    
         response = generate_overall_analysis(history)
         
         try:

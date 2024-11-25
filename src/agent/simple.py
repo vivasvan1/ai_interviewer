@@ -1,6 +1,7 @@
 # import base64
 import logging
 import os
+import openai
 
 # import whisper
 
@@ -11,6 +12,8 @@ from langchain.chat_models import ChatOpenAI
 import requests
 
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
+from src.processing.feedback.subjective import generate_feedback_by_history
+import copy
 
 chat = ChatOpenAI(temperature=0.3, openai_api_key=os.environ.get("OPENAI_API_KEY"))
 
@@ -61,6 +64,7 @@ system_response_prompt = """Ask only one question per response"""
 
 # stt_model = whisper.load_model("small")
 
+
 def conversation(message: str, chat_messages: list[BaseMessage]) -> str:
     # chat_messages.append(HumanMessage(content=message))
     # chat_messages[0] = SystemMessage(content=system_personality_prompt + system_response_prompt)
@@ -71,26 +75,25 @@ def conversation(message: str, chat_messages: list[BaseMessage]) -> str:
 def continueConversation(history: ChatMessageHistoryWithJSON):
     try:
         ai_reply: str = conversation("", history.messages)
-        
         return ai_reply
     except Exception as e:
         raise e
  
 
-def process_user_response(audio_data, history: ChatMessageHistoryWithJSON):
-    # audio_data = base64.b64decode(user_response_file)
-    # human_audio_obj = Audio(audio_data, rate=SAMPLE_RATE)
-    # with open(f"tmp_human.wav", "wb") as f:
-    #     f.write(audio_data)
+def process_user_response(audio_data, history: ChatMessageHistoryWithJSON, requireFeedback: bool):
 
     try:
         human_reply_text = speech_to_text(audio_data)
 
         history.add_user_message(human_reply_text)
+        
+        feedback_data = None
+        if requireFeedback:
+            feedback_data = generate_feedback_by_history(history)
+            
         ai_reply: str = conversation(human_reply_text, history.messages)
         history.add_ai_message(ai_reply)
-
-        return ai_reply
+        return ai_reply,feedback_data
     except Exception as e:
         raise e
 
@@ -115,3 +118,23 @@ def speech_to_text(audio_data):
     else:
         print(f"Request failed with status code {response.status_code}")
         response.raise_for_status()
+
+def translateToAnother(text_to_translate:str,target_language: str):
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": f"You are a helpful assistant who translates text."
+            },
+            {
+                "role": "user",
+                "content": f"Translate the following text into {target_language}: {text_to_translate}"
+            },
+        ]
+    )
+
+    # Extract the translated text
+    translated_text = response['choices'][0]['message']['content']
+    return translated_text

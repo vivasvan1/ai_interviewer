@@ -24,7 +24,7 @@ def read_pdf(upload_file: str) -> str:
     return text
 
 
-def get_questions_from_file(text: str, document_name: str):
+def get_questions_from_file(text: str, document_name: str,language: str):
     debug("Text of document", document_name, " = ", text)
     # Get the questions from GPT-3
     api_response = openai.ChatCompletion.create(
@@ -32,7 +32,7 @@ def get_questions_from_file(text: str, document_name: str):
         messages=[ 
             {
                 "role": "system",
-                "content": f"You are an interviewer and given this document and i want you to provide me a list of questions. ",
+                "content": f"You are an interviewer and given this document and i want you to provide me a list of questions in {language}. ",
             },
             {
                 "role": "user",
@@ -54,7 +54,7 @@ def get_questions_from_file(text: str, document_name: str):
     return questions_text
 
 
-def get_questions_from_resume_and_jd(resume_text: str, jd_text: str):
+def get_questions_from_resume_and_jd(resume_text: str, jd_text: str,language: str):
     # # Read Resume
     # resume_text = read_pdf(path_to_resume)
     # # Read JD
@@ -66,7 +66,7 @@ def get_questions_from_resume_and_jd(resume_text: str, jd_text: str):
         messages=[
             {
                 "role": "system",
-                "content": "You are an interviewer and given these documents and i want you to provide me a list of questions from it. ",
+                "content": f"You are an interviewer and given these documents and i want you to provide me a list of questions from it in {language}. ",
             },
             {
                 "role": "user",
@@ -90,7 +90,7 @@ def get_questions_from_resume_and_jd(resume_text: str, jd_text: str):
 
 
 def get_questions_from_resume_and_pre_generated_questions(
-    resume_text: str, questions_list: List[str]
+    resume_text: str, questions_list: List[str],language: str
 ):
     # # Read Resume
     # resume_text = read_pdf(path_to_resume)
@@ -104,7 +104,7 @@ def get_questions_from_resume_and_pre_generated_questions(
         messages=[
             {
                 "role": "system",
-                "content": "You are an interviewer and given some pre generated questions and resume and i want you to provide me a list of modified questions so that they are more relevant to the resume. ",
+                "content": f"You are an interviewer and given some pre generated questions and resume and i want you to provide me a list of modified questions so that they are more relevant to the resume in {language}. ",
             },
             {
                 "role": "user",
@@ -130,12 +130,12 @@ def get_questions_from_resume_and_pre_generated_questions(
 class QuestionGenerationStrategy(ABC):
 
     @abstractmethod
-    def generate(self, resume_text, jd_text, questions_list):
+    def generate(self, resume_text, jd_text, questions_list,language):
         pass
 
 
 class DefaultQuestionStrategy(QuestionGenerationStrategy):
-    def generate(self, resume_text, jd_text, questions_list):
+    def generate(self, resume_text, jd_text, questions_list,language):
         basic_questions = """Can you tell me about yourself?
 What are your strengths and weaknesses?
 Why do you want to work for this company?
@@ -150,32 +150,32 @@ Do you have any questions for us?"""
 
 
 class ResumeBasedQuestionStrategy(QuestionGenerationStrategy):
-    def generate(self, resume_text, jd_text, questions_list):
+    def generate(self, resume_text, jd_text, questions_list,language):
         # Logic for generating questions based solely on resume text
-        gen_question_text = get_questions_from_file(resume_text, "resume")
+        gen_question_text = get_questions_from_file(resume_text, "resume",language)
 
         return gen_question_text
 
 
 class JDBasedQuestionStrategy(QuestionGenerationStrategy):
 
-    def generate(self, resume_text, jd_text, questions_list):
+    def generate(self, resume_text, jd_text, questions_list,language):
         # Logic for generating questions based solely on job description text
-        gen_question_text = get_questions_from_file(jd_text, "interview context")
+        gen_question_text = get_questions_from_file(jd_text, "interview context",language)
 
         return gen_question_text
 
 
 class CombinedResumeWithJobDescStrategy(QuestionGenerationStrategy):
 
-    def generate(self, resume_text, jd_text, questions_list):
+    def generate(self, resume_text, jd_text, questions_list,language):
         # Logic for generating questions based on both resume and job description texts
-        gen_question_text = get_questions_from_resume_and_jd(resume_text, jd_text)
+        gen_question_text = get_questions_from_resume_and_jd(resume_text, jd_text,language)
         return gen_question_text
 
 
 class CombinedResumeWithQuestionsStrategy(QuestionGenerationStrategy):
-    def generate(self, resume_text, jd_text, questions_list):
+    def generate(self, resume_text, jd_text, questions_list,language):
         # Logic for generating questions based on both resume and job description texts
         gen_question_text = get_questions_from_resume_and_pre_generated_questions(
             resume_text, questions_list
@@ -185,7 +185,7 @@ class CombinedResumeWithQuestionsStrategy(QuestionGenerationStrategy):
 
 class QuestionListStrategy(QuestionGenerationStrategy):
 
-    def generate(self, resume_text, jd_text, questions_list):
+    def generate(self, resume_text, jd_text, questions_list,language):
         # Logic for generating questions based on both resume and job description texts
         gen_question_text = "\n".join(questions_list)
         return gen_question_text
@@ -220,6 +220,7 @@ def calculate_questions(
     questions=None,
     questions_list=[],
     is_dynamic=True,
+    language = "english"
 ):
     # Combine resume_text and resume_file if any one or both available
     full_resume_text = combine_file_content_and_text(resume_file, resume_text)
@@ -246,7 +247,7 @@ def calculate_questions(
 
 
     gen_question_text = strategy.generate(
-        full_resume_text, full_jd_text, questions_list
+        full_resume_text, full_jd_text, questions_list,language
     )
 
     # Combine ProvidedQuestions with GeneratedQuestions

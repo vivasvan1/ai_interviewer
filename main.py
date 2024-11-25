@@ -2,8 +2,6 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 
-from src.routes.proctoring import proctoring
-
 dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
@@ -52,6 +50,5 @@ app.include_router(feedback.router)
 app.include_router(interview.router)
 app.include_router(gen_metric.router)
 app.include_router(screener.router)
-app.include_router(proctoring.router)
 app.include_router(conversation.router)
 

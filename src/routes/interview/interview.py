@@ -3,7 +3,7 @@ import os
 import traceback
 from langchain.schema import SystemMessage
 from src.ai_names import VoiceType
-from src.processing.ai_prompt import interviewer_behavior_prompt
+from src.processing.ai_prompt import interviewer_behavior_prompt, practice_interviewer_behavior_prompt
 from src.utils.audio import convert_audio_to_base64
 from src.agent.simple import conversation, process_user_response
 from src.history.ChatMessageHistory import ChatMessageHistoryWithJSON
@@ -39,6 +39,8 @@ async def get_questions(
     jd: UploadFile = None,
     jdText: str = Body(default=None),
     questions: str = Body(default=None),
+    language: str = Body(default=None)
+    
 ):
     try:
         question_text = calculate_questions(
@@ -49,6 +51,7 @@ async def get_questions(
             questions,
             [],
             True,
+            language
         )
         return {"questions": question_arr_formatter(question_text) }
     except Exception as e:
@@ -70,9 +73,13 @@ async def initiate_interview(
     questions_list: List[str] = Body(default=[]),
     is_dynamic: bool = Body(default=True),
     voice: VoiceType = Body(default=VoiceType.alloy),
+    language: str = Body(default="english"),
+    interview_type: str = Body(default='campaign')
 ):
     try:
-        system_message = interviewer_behavior_prompt(
+        system_message = ""
+        if interview_type == 'practice' :
+            system_message = practice_interviewer_behavior_prompt(
             resume.file if resume else None,
             jd.file if jd else None,
             resumeText,
@@ -80,19 +87,24 @@ async def initiate_interview(
             questions,
             questions_list,
             is_dynamic,
-            voice
+            voice,
+            language
         )
+        else: 
+            system_message = interviewer_behavior_prompt(
+            resume.file if resume else None,
+            jd.file if jd else None,
+            resumeText,
+            jdText,
+            questions,
+            questions_list,
+            is_dynamic,
+            voice,
+            language
+        )
+        
         history = ChatMessageHistoryWithJSON()
         history.add_message(SystemMessage(content=system_message))
-        # history.add_ai_message(ai_reply)
-
-
-        # with open(f"./public/first_messages/ai_first_reply_{voice}.wav", "rb") as f:
-        #     ai_response_base64 = f.read().decode("ascii")
-        
-        # ai_response_base64 = convert_audio_to_base64(
-        #     do_text_to_speech(ai_reply, voice.value)
-        # )
 
         return {"response": "", "history": history.to_json()}
 

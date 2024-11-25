@@ -20,10 +20,11 @@ async def conversation_endpoint(websocket: WebSocket):
             if type == 'initial':
                 voice = msg.get('voice')
                 history = msg.get('history')
-                ai_reply =conversation.inititateConversation(voice,history)
+                language = msg.get('language')
+                interview_type = msg.get('interview_type')
+                ai_reply =conversation.inititateConversation(voice,history,language,interview_type)
                 await websocket.send_json(ai_reply)
             elif type == "reply":
-                print("recieved reply")
                 audio_binary = await websocket.receive_bytes()
                 reply = conversation.process_reply(audio_binary)
                 await websocket.send_json(reply)
